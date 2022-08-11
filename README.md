@@ -1,8 +1,6 @@
 # IndexOramCoDesign
 
-This is the repository associated with the corresponding master thesis by Philipp Imperatori.
-Further explanations how tu use this repo can be found in the folders *frontend* and *backend*.
-The first contains a simulator to run YCSB-like workloads with our design. The latter contains the actual design.
+This is the repository associated with the corresponding master thesis by Philipp Imperatori. Further explanations of how to use this repo can be found in the front- and back-end folders. The first contains a simulator to run YCSB-like workloads with our design. The latter includes the actual design.
 
 Abstract:
 ```
