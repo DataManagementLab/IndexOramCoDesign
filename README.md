@@ -5,6 +5,7 @@ Further explanations how tu use this repo can be found in the folders *frontend*
 The first contains a simulator to run YCSB-like workloads with our design. The latter contains the actual design.
 
 Abstract:
+```
 In the age of cloud computing and digitization, encrypting data is an obvious choice in most contexts.
 Using proper protocols is the approved solution to ensure confidentiality against the growing number of cyberattacks.
 However, research in recent years has shown that the access patterns to encrypted data alone can reveal significant information about the data itself.
@@ -28,3 +29,4 @@ As a result of these optimizations, we achieved an excellent gain of up to 69\% 
 In addition to the novel Index-ORAM-Co-Design, this thesis contributes with a comprehensive implementation in Rust, a programming language known for its security benefits.
 The implementation leverages the widely available Intel SGX to enable a trusted orchestrator on the database server.
 It facilitates future studies with its simulator front-end and provides a well-designed entrance for further engineering.
+```
