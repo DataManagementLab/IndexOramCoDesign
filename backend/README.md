@@ -1,11 +1,6 @@
 # Oblivious OLTP - Rust SGX SDK
 
-## Branch overview
-- main: Current working approach, contains the latest stable and checked optimizations
-- client_request_batches: Work on ORAM access batching
-- opt_intf_1: Better enclave-app interface by deserializing raw request
-- opt_intf_2: branch opt_intf_1 + nested ecall for returning ORAM path to enclave
-- others: Not described or archived old optimizations
+This source code leverages the [Apache Teaclave (incubating) SGX SDK](https://github.com/apache/incubator-teaclave-sgx-sdk).
 
 ## Prerequisites
 - Docker 
