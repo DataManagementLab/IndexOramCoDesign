@@ -1,18 +1,18 @@
 use alloc::string::ToString;
 use rand::Rng;
 use sgx_types::sgx_status_t;
-use std::collections::VecDeque;
-use std::ops::Div;
+
+
 use std::string::String;
 use std::sync::SgxMutex;
-use std::time::Instant;
-use std::untrusted::time::InstantEx;
+
+
 use std::vec::Vec;
 
 use config::{DynamicConfig, OramConfig};
-use crypto::generate_random_key;
+
 use helpers::generators::{
-    get_unix_timestamp, ObTreeNodeIdProvider, PacketIdProvider, QueryIdProvider,
+    get_unix_timestamp, PacketIdProvider, QueryIdProvider,
 };
 use helpers::oram_helper::{get_number_of_leaves, get_number_of_tree_nodes};
 use logger::{log_runtime, StatisticsToSend};
@@ -21,13 +21,8 @@ use oblivious_ram::components::BucketContent;
 use ocall_setup_oram;
 use oram_interface::{EnclaveStatistics, EnvironmentVariables};
 use query_response_cache::QueryResponseCache;
-use query_state::QueryState;
 use query_state_cache::QueryStateCache;
 use slot_cache::SlotCache;
-use sql_engine::sql_database::components::{SqlDmlOperation, SqlQueryValues};
-use sql_engine::sql_query::QueryNewRow;
-use SqlDmlQuery;
-
 use crate::crypto::{generate_random_rid, NonceProvider};
 use crate::enclave_state::EnclaveState;
 use crate::index_locality_cache::IndexLocalityCache;
@@ -38,7 +33,6 @@ use crate::sql_engine::sql_data_types::components::{SqlAbstractDataType, SqlData
 use crate::sql_engine::sql_database::components::{
     SqlAttribute, SqlDatabaseScheme, SqlTableRow, SqlTableScheme,
 };
-use crate::NUMBER_OF_THREADS;
 
 pub fn setup_oram(enclave_state: &EnclaveState) {
     let dynamic_config = enclave_state.lock_dynamic_config();

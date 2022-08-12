@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::string::String;
-use std::vec::Vec;
 
 use oblivious_data_structures::page::Slot;
 

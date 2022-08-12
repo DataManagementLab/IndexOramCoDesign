@@ -1,27 +1,27 @@
-use core::ops::Add;
+
 use serde::{Deserialize, Serialize};
-use sgx_types::s;
-use std::collections::{HashMap, HashSet};
-use std::string::String;
-use std::time::Instant;
+
+use std::collections::{HashMap};
+
+
 use std::untrusted::time::InstantEx;
 use std::vec::Vec;
 
-use logger::log_runtime;
+
 use oblivious_data_structures::ob_tree::components::Origin;
-use oblivious_ram::components::{BucketContent, BucketContentForLocal};
+use oblivious_ram::components::{BucketContentForLocal};
 use oblivious_ram::functions::{
-    evict_and_transform_bucket_contents_to_buckets, read_process_and_evict_oram_request_batch,
+    read_process_and_evict_oram_request_batch,
     transform_oram_fragments_to_logical_object, Object,
 };
 use oblivious_ram::packaging::Packet;
 use query_state::ObjectType;
-use {transform_buckets_to_bucket_contents, PRINT_PACKET_EVICTIONS};
+use {PRINT_PACKET_EVICTIONS};
 
 use crate::enclave_state::EnclaveState;
 use crate::helpers::oram_helper::get_number_of_leaves;
 use crate::oblivious_data_structures::position_tag::PositionTag;
-use crate::oblivious_ram::api;
+
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct PacketStash {
@@ -181,7 +181,7 @@ impl PacketStash {
         for (_oram_id, oram) in self.stash.iter() {
             for (_path, packets) in oram.iter() {
                 for packet in packets.iter() {
-                    byte_size += (packet.byte_size() as u64);
+                    byte_size += packet.byte_size() as u64;
                 }
             }
         }
@@ -211,7 +211,7 @@ impl PacketStash {
             for (_path, packets) in oram.iter() {
                 number += packets.len();
                 for packet in packets.iter() {
-                    let packet_byte_size = (packet.byte_size() as u64);
+                    let packet_byte_size = packet.byte_size() as u64;
                     total_byte_size += packet_byte_size;
                     if packet_byte_size > max_byte_size {
                         max_byte_size = packet_byte_size;

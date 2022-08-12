@@ -1,25 +1,12 @@
-use alloc::collections::VecDeque;
 use std::collections::HashMap;
-use std::string::String;
-use std::sync::SgxMutexGuard;
-use std::time::Instant;
-use std::untrusted::time::InstantEx;
-use std::vec::Vec;
-
 use serde::{Deserialize, Serialize};
-
 use enclave_state::EnclaveState;
-use helpers::range::Range;
 use oblivious_data_structures::ob_tree::api::traverse_ob_tree;
 use oblivious_data_structures::ob_tree::components::{
-    ObTree, ObTreeChildPointer, ObTreeDirectory, ObTreeTuplePointer,
+    ObTreeDirectory,
 };
-use oblivious_data_structures::page::{SlotContent, SlotPointer};
-use oblivious_data_structures::position_tag::PositionTag;
-use query_state::{NextPos, ObTreeOperation, ObjectType, ParentNodeId, QueryState};
-use sql_engine::sql_data_types::components::SqlDataType;
-use {log_runtime, DEBUG_PRINTS};
-use {IndexLocalityCache, DEBUG_RUNTIME_CHECKS};
+use query_state::{NextPos, QueryState};
+use {DEBUG_RUNTIME_CHECKS};
 
 /// The cache of QueryStates
 #[derive(Serialize, Deserialize, Clone)]

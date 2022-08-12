@@ -1,6 +1,6 @@
 pub mod api {
     use sgx_types::sgx_status_t;
-    use std::string::String;
+
     use std::vec::Vec;
 
     use oram_interface::{EnclaveStatistics, EnvironmentVariables};
@@ -626,7 +626,7 @@ pub mod components {
     use std::string::{ToString};
     use std::vec::Vec;
 
-    use logger::log_runtime;
+
     use oblivious_ram::packaging::Packet;
     use AES_TAG_LEN;
     use DEBUG_RUNTIME_CHECKS;

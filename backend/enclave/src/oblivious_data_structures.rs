@@ -1840,7 +1840,7 @@ pub mod ob_tree {
         use oblivious_data_structures::page::{Slot, SlotContent};
         use oblivious_data_structures::position_tag::PositionTag;
         use query_state::{ParentNodeId};
-        use {log_runtime};
+
         use {EnclaveState, DEBUG_RUNTIME_CHECKS};
 
         pub fn evict_slot_back_to_front(

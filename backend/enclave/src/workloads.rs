@@ -1,41 +1,41 @@
-use alloc::collections::BTreeMap;
+
 use core::cmp::min;
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use std::collections::HashMap;
-use std::string::String;
+
 use std::time::Instant;
 use std::untrusted::time::InstantEx;
 use std::vec::Vec;
 
 use clear_index_locality_cache_to_packet_stash;
 use helpers::oram_helper::get_possible_positions;
-use helpers::range::Range;
+
 use oblivious_data_structures::ob_tree::components::{
-    ObTree, ObTreeQuery, ObTreeQueryValue, ObTreeQueryValueRange,
+    ObTreeQuery, ObTreeQueryValue,
 };
-use oblivious_data_structures::position_tag::PositionTag;
+
 use oblivious_ram::api;
-use oblivious_ram::api::send_generic_request;
-use oblivious_ram::functions::{read_process_and_evict_oram_request_batch, Object};
-use oblivious_ram::packaging::Packet;
+
+use oblivious_ram::functions::{read_process_and_evict_oram_request_batch};
+
 use oram_interface::{GenericRequestToServer, ResourceUsageReport};
 use preparation::generate_row;
 use query_state::ObjectType::NodeObjectType;
 use query_state::{
-    InsertOperationState, NextPos, ObTreeOperation, ObjectType, ParentNodeId, QueryState,
+    InsertOperationState, NextPos, ObTreeOperation, ObjectType, QueryState,
 };
 use query_state_cache::state_transition;
-use sql_engine::sql_database::components::SqlAttribute;
+
 use PRINT_PACKET_EVICTIONS;
 use {enclave_caches, DEBUG_PRINTS};
-use {ExperimentWorkloadRequest, IndexLocalityCache};
+use {ExperimentWorkloadRequest};
 
 use crate::enclave_state::EnclaveState;
 use crate::logger::*;
 use crate::oblivious_data_structures::page::SlotContent;
 use crate::packet_stash::clear_to_oram;
-use crate::preparation::generate_rows;
+
 use crate::sql_engine::sql_data_types::components::SqlDataType;
 
 fn process_query_state_cache(enclave_state: &EnclaveState) {

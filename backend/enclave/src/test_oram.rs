@@ -1,13 +1,13 @@
 use crypto::generate_random_key;
-use helpers::oram_helper::get_number_of_leaves;
+
 use oblivious_data_structures::position_tag::PositionTag;
-use oblivious_ram::functions::Object;
+
 use oblivious_ram::packaging::Packet;
 use rand::Rng;
-use std::collections::HashSet;
-use std::vec::Vec;
-use {oblivious_ram, EnclaveState};
-use {transform_buckets_to_bucket_contents, MAX_PACKET_SIZE};
+
+
+use {EnclaveState};
+use {MAX_PACKET_SIZE};
 
 fn generate_random_packet(enclave_state: &EnclaveState) -> Packet {
     let mut rng = rand::thread_rng();

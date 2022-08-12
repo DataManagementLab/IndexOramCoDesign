@@ -4,8 +4,8 @@ pub mod sql_data_types {
         use serde::{Deserialize, Serialize};
         use sql_engine::sql_query::CmpOperator;
         use std::cmp::Ordering;
-        use std::string::{String, ToString};
-        use std::vec::Vec;
+        use std::string::{String};
+
 
         use crate::sql_engine::sql_data_types::functions::display_sql_data_type;
 
@@ -875,8 +875,8 @@ pub mod sql_data_types {
 pub mod sql_query {
     use serde::{Deserialize, Serialize};
     use std::collections::HashMap;
-    use std::string::{String, ToString};
-    use std::vec::Vec;
+    use std::string::{String};
+
 
     use sql_engine::sql_database::components::SqlTableRow;
 
@@ -965,14 +965,11 @@ pub mod sql_query {
 pub mod sql_database {
     pub mod components {
         use serde::{Deserialize, Serialize};
-        use std::string::{String, ToString};
+        use std::string::{String};
         use std::vec::Vec;
-
         use logger::log_runtime;
         use query_state::ObTreeSlotContentFilter;
-        use sql_engine::sql_query::{CmpOperator, QueryNewRow};
-        use utils::Pair;
-
+        use sql_engine::sql_query::{QueryNewRow};
         use crate::sql_engine::sql_data_types::components::{SqlAbstractDataType, SqlDataType};
         use crate::sql_engine::sql_data_types::functions::display_sql_data_type;
         use crate::sql_engine::sql_query::{QueryFilter, QueryNewValues};
