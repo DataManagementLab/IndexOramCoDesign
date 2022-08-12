@@ -1,6 +1,5 @@
 use config::OramConfig;
 use serde::{Deserialize, Serialize};
-use std::string::String;
 use std::sync::{SgxMutex, SgxMutexGuard};
 use std::time::Instant;
 use std::untrusted::time::InstantEx;

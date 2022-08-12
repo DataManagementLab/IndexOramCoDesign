@@ -29,5 +29,5 @@ plotters = "^0.3.1"
 # sudo apt-get install libfontconfig libfontconfig1-dev
 
 [patch.'https://github.com/apache/teaclave-sgx-sdk.git']
-sgx_alloc = { path = "../../incubator-teaclave-sgx-sdk/sgx_alloc" }
-#sgx_tstd = { path = "../../incubator-teaclave-sgx-sdk/sgx_tstd" }
+sgx_alloc = { path = "../../../incubator-teaclave-sgx-sdk/sgx_alloc" }
+#sgx_tstd = { path = "../../../incubator-teaclave-sgx-sdk/sgx_tstd" }
