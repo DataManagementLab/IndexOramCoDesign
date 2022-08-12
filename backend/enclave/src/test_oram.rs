@@ -9,6 +9,7 @@ use rand::Rng;
 use {EnclaveState};
 use {MAX_PACKET_SIZE};
 
+#[allow(dead_code)]
 fn generate_random_packet(enclave_state: &EnclaveState) -> Packet {
     let mut rng = rand::thread_rng();
     let rand_int: usize = rng.gen_range(1, MAX_PACKET_SIZE);

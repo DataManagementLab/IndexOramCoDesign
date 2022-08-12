@@ -46,7 +46,7 @@ pub fn oram_access_benchmark(enclave_state: &EnclaveState) {
                 oram_buckets
             };
 
-            let mut oram_buckets = {
+            let oram_buckets = {
                 let dynamic_config = enclave_state.lock_dynamic_config();
                 let mut statistics = enclave_state.lock_statistics();
                 transform_buckets_to_bucket_contents(
@@ -57,7 +57,7 @@ pub fn oram_access_benchmark(enclave_state: &EnclaveState) {
                 )
             };
 
-            let mut local_buckets: Vec<BucketContentForLocal> = oram_buckets
+            let local_buckets: Vec<BucketContentForLocal> = oram_buckets
                 .into_iter()
                 .map(|bucket_content| bucket_content.to_bucket_content_for_local(bucket_size))
                 .collect();
@@ -86,15 +86,15 @@ pub fn oram_access_benchmark(enclave_state: &EnclaveState) {
             total_write_time += oram_write_time.elapsed().as_nanos() as f64;
 
             {
-                let mut statistics_to_send = enclave_state.lock_statistics_to_send();
+                let statistics_to_send = enclave_state.lock_statistics_to_send();
                 total_free_space += statistics_to_send.free_oram_space_after();
             }
         }
     }
 
-    let mut total_read_time = total_read_time / (number_accesses as f64);
-    let mut total_write_time = total_write_time / (number_accesses as f64);
-    let mut total_free_space = total_free_space / (number_accesses as f64);
+    let total_read_time = total_read_time / (number_accesses as f64);
+    let total_write_time = total_write_time / (number_accesses as f64);
+    let total_free_space = total_free_space / (number_accesses as f64);
     println!("Average Read Time: {}", total_read_time);
     println!("Average Write Time: {}", total_write_time);
     println!("Average Free Space: {}", total_free_space);

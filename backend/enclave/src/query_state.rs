@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 
 
 use std::vec::Vec;
@@ -68,9 +68,6 @@ impl QueryState {
     }
     pub fn operation_type(&self) -> &ObTreeOperation {
         &self.operation_type
-    }
-    pub fn mut_operation_type(&mut self) -> &mut ObTreeOperation {
-        &mut self.operation_type
     }
     pub fn id(&self) -> u128 {
         self.id
@@ -149,6 +146,7 @@ pub struct DeleteOperationState {
 }
 
 impl DeleteOperationState {
+    #[allow(dead_code)]
     pub fn new(slot_content_filter: Option<ObTreeSlotContentFilter>) -> Self {
         DeleteOperationState {
             slot_content_filter,
@@ -183,24 +181,28 @@ pub enum ObTreeOperation {
 }
 
 impl ObTreeOperation {
+    #[allow(dead_code)]
     pub fn get_insert_query_state(&self) -> Option<&InsertOperationState> {
         match self {
             ObTreeOperation::INSERT(state) => Some(state),
             _ => None,
         }
     }
+    #[allow(dead_code)]
     pub fn mut_insert_query_state(&mut self) -> Option<&mut InsertOperationState> {
         match self {
             ObTreeOperation::INSERT(state) => Some(state),
             _ => None,
         }
     }
+    #[allow(dead_code)]
     pub fn get_delete_query_state(&self) -> Option<&DeleteOperationState> {
         match self {
             ObTreeOperation::DELETE(delete_query_state) => Some(delete_query_state),
             _ => None,
         }
     }
+    #[allow(dead_code)]
     pub fn mut_delete_query_state(&mut self) -> Option<&mut DeleteOperationState> {
         match self {
             ObTreeOperation::DELETE(delete_query_state) => Some(delete_query_state),
@@ -217,6 +219,7 @@ pub enum ObTreeSlotContentFilter {
 }
 
 impl ObTreeSlotContentFilter {
+    #[allow(dead_code)]
     pub fn attributes(
         &self,
     ) -> Option<&HashMap<u32, utils::Pair<SqlDataType, sql_engine::sql_query::CmpOperator>>> {
@@ -225,6 +228,7 @@ impl ObTreeSlotContentFilter {
             ObTreeSlotContentFilter::RIDS(_) => None,
         }
     }
+    #[allow(dead_code)]
     pub fn rids(&self) -> Option<&Vec<SqlDataType>> {
         match self {
             ObTreeSlotContentFilter::ATTRIBUTES(_) => None,
@@ -244,12 +248,6 @@ impl ObjectType {
         match self {
             ObjectType::NodeObjectType => "NodeObjectType",
             ObjectType::SlotObjectType => "SlotObjectType",
-        }
-    }
-    pub fn is_slot_type(&self) -> bool {
-        match self {
-            ObjectType::SlotObjectType => true,
-            _ => false,
         }
     }
 }
@@ -302,6 +300,7 @@ impl ParentId {
             ParentId::Slot(_) => None,
         }
     }
+    #[allow(dead_code)]
     pub fn destroy_to_node(self) -> Option<ParentNodeId> {
         match self {
             ParentId::Node(node) => Some(node),
@@ -320,6 +319,7 @@ impl ParentId {
             ParentId::Slot(_) => None,
         }
     }
+    #[allow(dead_code)]
     pub fn mut_slot(&mut self) -> Option<&mut ParentSlotId> {
         match self {
             ParentId::Node(_) => None,
@@ -343,6 +343,7 @@ impl ParentSlotId {
     pub fn copy_cache_id(&self) -> u128 {
         self.cache_id
     }
+    #[allow(dead_code)]
     pub fn set_cache_id(&mut self, cache_id: u128) {
         self.cache_id = cache_id;
     }

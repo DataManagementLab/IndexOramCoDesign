@@ -76,7 +76,7 @@ use std::vec::Vec;
 
 // Custom Imports
 use enclave_state::{EnclaveState, EnclaveStateCache, EnclaveStateToSend};
-use index_locality_cache::{clear_index_locality_cache_to_packet_stash, IndexLocalityCache};
+use index_locality_cache::{clear_index_locality_cache_to_packet_stash};
 use logger::log_runtime;
 use micro_benchmark::oram_access_benchmark;
 use oblivious_ram::api;
@@ -88,7 +88,6 @@ use oram_interface::{
 };
 use packet_stash::clear_to_oram;
 use preparation::check_environment;
-use sql_engine::sql_database::components::SqlDmlQuery;
 use workloads::*;
 
 const MAX_PACKET_SIZE: usize = 7566;
@@ -100,17 +99,10 @@ const AES_TAG_LEN: usize = 16;
 const EMPTY_NONCE: [u8; 12] = [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8];
 // in bytes for content of block (without meta)
 
-const NUMBER_OF_THREADS: usize = 8;
-const SERVER_IP: &str = "http://127.0.0.1:5000";
-
-const BLOCK_ID_BYTE_LEN: usize = 16;
-
 const RIDS_PER_SLOT: usize = 50;
 
 //const ENCRYPTION_CIPHER: u8 = 0u8; // 0: AES, 1: ChaCha
 const SHARED_KEY_LEN: usize = 16;
-
-const DUMMY_SEQUENCE: &str = "AAAABBBBCCCCDDDD";
 
 const DEBUG_RUNTIME_CHECKS: bool = false;
 const DEBUG_PRINTS: bool = false;
@@ -162,9 +154,9 @@ impl PathCache {
 }
 
 lazy_static! {
-    static ref enclave_state_cache: SgxMutex<EnclaveStateCache> =
+    static ref ENCLAVE_STATE_CACHE: SgxMutex<EnclaveStateCache> =
         SgxMutex::new(EnclaveStateCache::new(None));
-    static ref buckets_from_server_cache: SgxMutex<PathCache> =
+    static ref BUCKETS_FROM_SERVER_CACHE: SgxMutex<PathCache> =
         SgxMutex::new(PathCache::new_empty());
 }
 
@@ -176,19 +168,19 @@ pub extern "C" fn ecall_generic_request(request: *const u8, request_len: u32) ->
 
     match request {
         GenericRequestToEnclave::ExperimentWorkloadRequest(exp_request) => {
-            let enclave_state_cache_locked = enclave_state_cache.lock().unwrap();
+            let enclave_state_cache_locked = ENCLAVE_STATE_CACHE.lock().unwrap();
             let enclave_state = enclave_state_cache_locked.enclave_state_ref().unwrap();
             process_experiment_workload_request(enclave_state, exp_request);
         }
         GenericRequestToEnclave::ClearIndexLocalityCache => {
-            let enclave_state_cache_locked = enclave_state_cache.lock().unwrap();
+            let enclave_state_cache_locked = ENCLAVE_STATE_CACHE.lock().unwrap();
             let enclave_state = enclave_state_cache_locked.enclave_state_ref().unwrap();
             if enclave_state.lock_dynamic_config().index_locality_cache() {
                 clear_index_locality_cache_to_packet_stash(enclave_state);
             }
         }
         GenericRequestToEnclave::ClearPacketStash => {
-            let enclave_state_cache_locked = enclave_state_cache.lock().unwrap();
+            let enclave_state_cache_locked = ENCLAVE_STATE_CACHE.lock().unwrap();
             let enclave_state = enclave_state_cache_locked.enclave_state_ref().unwrap();
             clear_to_oram(&enclave_state);
         }
@@ -217,7 +209,7 @@ pub extern "C" fn ecall_generic_request(request: *const u8, request_len: u32) ->
                 .lock_statistics()
                 .reset(index_locality_cache, init_enclave_conf.fill_grade());
 
-            let mut enclave_state_cache_locked = enclave_state_cache.lock().unwrap();
+            let mut enclave_state_cache_locked = ENCLAVE_STATE_CACHE.lock().unwrap();
             enclave_state_cache_locked.set_enclave_state(Some(enclave_state));
             drop(enclave_state_cache_locked);
 
@@ -225,7 +217,7 @@ pub extern "C" fn ecall_generic_request(request: *const u8, request_len: u32) ->
         }
         GenericRequestToEnclave::EnclaveStateBackupRequest(file_name) => {
             let enclave_state_to_send = {
-                let mut enclave_state_cache_locked = enclave_state_cache.lock().unwrap();
+                let mut enclave_state_cache_locked = ENCLAVE_STATE_CACHE.lock().unwrap();
                 let enclave_state_to_send = {
                     let enclave_state = enclave_state_cache_locked.enclave_state_ref().unwrap();
                     enclave_state.lock_obt_node_cache().shrink_to_fit();
@@ -268,7 +260,7 @@ pub extern "C" fn ecall_generic_request(request: *const u8, request_len: u32) ->
             }
         }
         GenericRequestToEnclave::EnclaveStateRestoreBackupRequest(byte_obj) => {
-            let mut enclave_state_cache_locked = enclave_state_cache.lock().unwrap();
+            let mut enclave_state_cache_locked = ENCLAVE_STATE_CACHE.lock().unwrap();
             let enclave_state_backup: EnclaveStateToSend =
                 bincode::deserialize(byte_obj.data()).unwrap();
             let enclave_state_backup = EnclaveState::from_backup(enclave_state_backup);
@@ -276,7 +268,7 @@ pub extern "C" fn ecall_generic_request(request: *const u8, request_len: u32) ->
             drop(enclave_state_cache_locked);
         }
         GenericRequestToEnclave::ORAMBenchmark => {
-            let enclave_state_cache_locked = enclave_state_cache.lock().unwrap();
+            let enclave_state_cache_locked = ENCLAVE_STATE_CACHE.lock().unwrap();
             let enclave_state = enclave_state_cache_locked.enclave_state_ref().unwrap();
             oram_access_benchmark(enclave_state);
         }
@@ -287,9 +279,6 @@ pub extern "C" fn ecall_generic_request(request: *const u8, request_len: u32) ->
 
 #[no_mangle]
 pub extern "C" fn ecall_run_tests() -> sgx_status_t {
-    let enclave_state_cache_locked = enclave_state_cache.lock().unwrap();
-    let enclave_state = enclave_state_cache_locked.enclave_state_ref().unwrap();
-
     //test_oram::test_read_write_oram(enclave_state);
     test_enclave::test_ob_tree_query_value();
 
@@ -304,7 +293,7 @@ pub extern "C" fn ecall_return_oram_path(
     buckets_len: u32,
     single_bucket_len: u64,
 ) -> sgx_status_t {
-    let mut cache = buckets_from_server_cache.lock().unwrap();
+    let mut cache = BUCKETS_FROM_SERVER_CACHE.lock().unwrap();
     let buckets_len = buckets_len as usize;
     let buckets_slice = unsafe { slice::from_raw_parts(buckets, buckets_len) };
 

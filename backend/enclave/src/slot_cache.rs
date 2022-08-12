@@ -42,6 +42,7 @@ impl SlotCache {
         }
         byte_size
     }
+    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         return self.size() == 0;
     }

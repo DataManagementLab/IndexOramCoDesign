@@ -43,7 +43,7 @@ impl QueryStateCache {
         ob_tree_directory: &mut ObTreeDirectory,
         mut query_state: QueryState,
     ) -> Option<QueryState> {
-        let mut ob_tree = ob_tree_directory
+        let ob_tree = ob_tree_directory
             .mut_tree(&query_state.ob_tree_query().index_id())
             .unwrap();
         match ob_tree
@@ -166,7 +166,7 @@ pub fn state_transition(enclave_state: &EnclaveState, mut query: QueryState) {
                 //log_runtime(&format!("New served_id: {}", served_id), true);
             }
             let mut obt_directory = enclave_state.lock_obt_tree_directory();
-            let mut ob_tree = obt_directory
+            let ob_tree = obt_directory
                 .mut_tree(&query.ob_tree_query().index_id())
                 .unwrap();
             ob_tree.remove_from_query_locks(

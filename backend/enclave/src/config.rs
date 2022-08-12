@@ -117,6 +117,7 @@ pub struct DynamicConfig {
     keep_not_requested_in_buckets: f64,
 }
 
+#[allow(dead_code)]
 impl DynamicConfig {
     pub fn save_model(&self) -> bool {
         self.save_model
@@ -147,7 +148,7 @@ impl DynamicConfig {
         self.initial
     }
     pub fn set_initial(&mut self, initial: bool) {
-        log_runtime(&format!("DynamicConfig - set_inital: {}", initial), true);
+        log_runtime(&format!("DynamicConfig - set_inital: {}", initial));
         self.initial = initial;
     }
     pub fn shared_enclave_key(&self) -> &[u8; crate::SHARED_KEY_LEN] {
@@ -158,11 +159,11 @@ impl DynamicConfig {
         self.activate_encryption();
     }
     pub fn activate_encryption(&mut self) {
-        log_runtime("Encryption is activated!", true);
+        log_runtime("Encryption is activated!");
         self.use_encryption = true;
     }
     pub fn deactivate_encryption(&mut self) {
-        log_runtime("Encryption is deactivated!", true);
+        log_runtime("Encryption is deactivated!");
         self.use_encryption = false;
     }
     pub fn use_encryption(&self) -> bool {

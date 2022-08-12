@@ -14,6 +14,7 @@ pub mod range {
         upper: Vec<u8>,
     }
 
+    #[allow(dead_code)]
     impl ByteRange {
         pub fn lower(&self) -> &Vec<u8> {
             &self.lower
@@ -56,6 +57,7 @@ pub mod range {
         upper: T,
     }
 
+    #[allow(dead_code)]
     impl<T: std::cmp::Ord> Range<T> {
         pub fn new(lower: T, upper: T) -> Self {
             Range { lower, upper }
@@ -141,6 +143,7 @@ pub mod oram_helper {
         (area_start, (area_start + area_size - 1))
     }
 
+    #[allow(dead_code)]
     pub fn get_number_of_intersecting_buckets(
         oram_degree: usize,
         oram_tree_height: usize,
@@ -163,6 +166,7 @@ pub mod oram_helper {
     }
 
     // level starting from zero (root level)
+    #[allow(dead_code)]
     pub fn index_at_oram_level(
         oram_degree: usize,
         leaf: u32,
@@ -174,24 +178,6 @@ pub mod oram_helper {
         // AREA SIZE: The number of leaves that are represented by one bucket in this level
         let leaf = (leaf as usize) - 1;
         leaf / area_size
-        /*
-        // Number of buckets at this tree level
-        let index = {
-            let area_size = number_of_leaves / level_len;
-            // AREA SIZE: The number of leaves that are represented by one bucket in this level
-            let rest = if ((leaf as usize) % area_size) == 0 {
-                // When there is no rest, the logical index suits
-                0
-            } else {
-                // When there is a rest, we need to upgrade the logical index to the next higher
-                // bucket
-                1
-            };
-            ((leaf as usize) / area_size) + rest - 1
-            // -1 for getting the physical index (starting from zero)
-        };
-        index
-         */
     }
 
     // logical position: starts with one
@@ -213,6 +199,7 @@ pub mod oram_helper {
         number_leaves
     }
 
+    #[allow(dead_code)]
     pub fn get_number_of_inner_nodes(oram_degree: u32, oram_tree_height: usize) -> u32 {
         get_number_of_tree_nodes(oram_degree, (oram_tree_height - 1) as u32)
     }
@@ -225,6 +212,7 @@ pub mod oram_helper {
 pub mod convert {
     use std::vec::Vec;
 
+    #[allow(dead_code)]
     pub fn u32_to_sparse_bytes(index: u32) -> Vec<u8> {
         let bytes = index.to_be_bytes().to_vec();
         if index < 256u32 {
@@ -240,6 +228,7 @@ pub mod convert {
         bytes
     }
 
+    #[allow(dead_code)]
     pub fn sparse_bytes_to_u32(bytes: &Vec<u8>) -> u32 {
         assert!(bytes.len() <= 4, "len is {}", bytes.len());
         let mut u32_array = [0u8; 4];
@@ -254,21 +243,6 @@ pub mod generators {
     use serde::{Deserialize, Serialize};
     use std::time::SystemTime;
     use std::untrusted::time::SystemTimeEx;
-
-    pub struct ObTreeNodeIdProvider {
-        current: u128,
-    }
-
-    impl ObTreeNodeIdProvider {
-        pub fn new() -> Self {
-            ObTreeNodeIdProvider { current: 0 }
-        }
-        pub fn get_new(&mut self) -> u128 {
-            let id = self.current;
-            self.current += 1;
-            id
-        }
-    }
 
     #[derive(Serialize, Deserialize, Clone)]
     pub struct PacketIdProvider {

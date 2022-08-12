@@ -47,12 +47,15 @@ impl ObTreeNodeCache {
         }
         byte_size
     }
+    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.map().is_empty()
     }
+    #[allow(dead_code)]
     pub fn nodes(&self) -> Values<u128, ObTreeNode> {
         self.map.values()
     }
+    #[allow(dead_code)]
     pub fn keys(&self) -> Vec<u128> {
         self.map.iter().map(|(key, _)| *key).collect()
     }

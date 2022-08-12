@@ -21,7 +21,6 @@ use oblivious_ram::functions::{read_process_and_evict_oram_request_batch};
 
 use oram_interface::{GenericRequestToServer, ResourceUsageReport};
 use preparation::generate_row;
-use query_state::ObjectType::NodeObjectType;
 use query_state::{
     InsertOperationState, NextPos, ObTreeOperation, ObjectType, QueryState,
 };
@@ -40,7 +39,7 @@ use crate::sql_engine::sql_data_types::components::SqlDataType;
 
 fn process_query_state_cache(enclave_state: &EnclaveState) {
     {
-        let mut query_state_cache = enclave_state.lock_query_state_cache();
+        let query_state_cache = enclave_state.lock_query_state_cache();
         if query_state_cache.served() == query_state_cache.last() {
             assert_eq!(
                 query_state_cache.size(),
@@ -72,9 +71,9 @@ fn process_query_state_cache(enclave_state: &EnclaveState) {
         .min_matching_prefix_level();
 
     let (current_query_id, mut queries_to_process) = {
-        let mut query_state_cache = enclave_state.lock_query_state_cache();
+        let query_state_cache = enclave_state.lock_query_state_cache();
         let current_query_id = query_state_cache.served() + 1;
-        let mut queries_to_process: Vec<u128> = vec![current_query_id];
+        let queries_to_process: Vec<u128> = vec![current_query_id];
         (current_query_id, queries_to_process)
     };
 
@@ -423,7 +422,7 @@ pub fn process_experiment_workload_request(
                     None => None,
                     Some(some_inserted_rids) => {
                         if exp_request.skew() {
-                            log_runtime("RIDs to search are sorted.", true);
+                            log_runtime("RIDs to search are sorted.");
                             some_inserted_rids.sort();
                         } else {
                             let mut rng = rand::thread_rng();
@@ -471,7 +470,6 @@ pub fn process_experiment_workload_request(
             "Workload with name >{}< has successfully finished.",
             exp_request.experiment_name()
         ),
-        true,
     );
 }
 
@@ -495,18 +493,17 @@ fn ycsb_obt_query_workload(
         None
     };
 
-    let mut number_selects = match rids_to_search.as_ref() {
+    let number_selects = match rids_to_search.as_ref() {
         None => 0,
         Some(some_rids_to_search) => some_rids_to_search.len(),
     };
-    let mut number_inserts = query_amount - number_selects;
+    let number_inserts = query_amount - number_selects;
     assert_eq!(number_inserts + number_selects, query_amount);
     log_runtime(
         &format!(
             "Number of insertions: {}, number of selections: {}",
             number_inserts, number_selects
         ),
-        true,
     );
 
     let mut query_distribution = Vec::with_capacity(query_amount);
@@ -534,7 +531,7 @@ fn ycsb_obt_query_workload(
         .unwrap();
     let key_conf = table_scheme.get_attribute(0).unwrap().clone();
 
-    log_runtime(&format!("####### WORKLOAD: {} #######", name), true);
+    log_runtime(&format!("####### WORKLOAD: {} #######", name));
     log_runtime(
         &format!(
             "The primary tree has a height of {} before the workload.",
@@ -544,11 +541,9 @@ fn ycsb_obt_query_workload(
                 .unwrap()
                 .height()
         ),
-        true,
     );
     log_runtime(
         &format!("Workload of {} queries starts...", query_amount),
-        true,
     );
 
     let mut remaining_batch_size = query_batch_size;
@@ -603,7 +598,6 @@ fn ycsb_obt_query_workload(
             if (generated_queries % 2000) == 0 {
                 log_runtime(
                     &format!("{} queries were generated.", generated_queries),
-                    true,
                 );
             }
         }
@@ -678,7 +672,6 @@ fn ycsb_obt_query_workload(
                 .height(),
             generated_queries
         ),
-        true,
     );
 
     if display_stats {
@@ -688,7 +681,7 @@ fn ycsb_obt_query_workload(
     }
 
     if clear_stash_afterwards {
-        log_runtime("Packet stash will be cleared to ORAM.", true);
+        log_runtime("Packet stash will be cleared to ORAM.");
         clear_to_oram(enclave_state);
     }
     if enclave_state.lock_obt_node_cache().size() != enclave_state.lock_obt_tree_directory().size()

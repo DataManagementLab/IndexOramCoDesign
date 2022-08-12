@@ -33,9 +33,6 @@ impl IndexLocalityCache {
         }
         byte_size
     }
-    pub fn is_empty(&self) -> bool {
-        self.cache.is_empty()
-    }
     pub fn pop_all_packets_to_stash(&mut self, stash: &mut PacketStash) {
         let number_of_packets = self.size();
         let mut keys: Vec<u128> = Vec::with_capacity(number_of_packets);
@@ -68,9 +65,6 @@ impl IndexLocalityCache {
             stash.add_packet(packet, packet_size);
         }
         stats.inc_time_flush_packets_of_query_id_to_stash(time.elapsed().as_nanos());
-    }
-    pub fn contains(&self, key: &u128) -> bool {
-        self.cache.contains_key(key)
     }
     pub fn insert(&mut self, packet: Packet, query_id: u128) {
         self.cache

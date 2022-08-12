@@ -5,3 +5,6 @@ enclave/target/
 frontend/node_modules/
 *.iml
 /.idea
+target/
+*.lock
+bin/

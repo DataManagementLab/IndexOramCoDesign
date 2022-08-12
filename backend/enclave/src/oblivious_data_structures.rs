@@ -38,6 +38,7 @@ pub mod position_tag {
         packet_id: u128,
     }
 
+    #[allow(dead_code)]
     impl PositionTag {
         pub fn new_random_from_packet_id(
             number_of_oram: u32,
@@ -68,13 +69,6 @@ pub mod position_tag {
                 packet_id: enclave_state.lock_packet_id_provider().make_id(),
             }
         }
-        pub fn clone_with_random_block_id(&self, enclave_state: &EnclaveState) -> PositionTag {
-            PositionTag {
-                oram_id: self.oram_id(),
-                path: self.path(),
-                packet_id: enclave_state.lock_packet_id_provider().make_id(),
-            }
-        }
         pub fn new_dummy() -> Self {
             PositionTag {
                 oram_id: 0,
@@ -91,7 +85,7 @@ pub mod position_tag {
         pub fn set_path(&mut self, path: u32) {
             self.path = path;
         }
-        pub fn set_from(&mut self, mut position_tag: PositionTag) {
+        pub fn set_from(&mut self, position_tag: PositionTag) {
             let (oram_id, path, packet_id) = position_tag.destroy();
             self.oram_id = oram_id;
             self.path = path;
@@ -172,15 +166,10 @@ pub mod page {
         pub fn rids(&self) -> &Vec<SqlDataType> {
             &self.rids
         }
-        pub fn add_rid(&mut self, rid: SqlDataType) {
-            self.rids.push(rid);
-        }
-        pub fn pop_rid(&mut self) -> Option<SqlDataType> {
-            self.rids.pop()
-        }
         pub fn mut_rids(&mut self) -> &mut Vec<SqlDataType> {
             &mut self.rids
         }
+        #[allow(dead_code)]
         pub fn new(rids: Vec<SqlDataType>, next: Option<SlotPointer>) -> Self {
             RIDChainItem {
                 rids,
@@ -279,9 +268,6 @@ pub mod page {
         pub fn mut_content(&mut self) -> &mut SlotContent {
             &mut self.content
         }
-        pub fn content_copy(&self) -> SlotContent {
-            self.content.clone()
-        }
         pub fn new(content: SlotContent, origin: Origin) -> Self {
             Slot {
                 content,
@@ -341,6 +327,7 @@ pub mod page {
         fill_amount: usize,
     }
 
+    #[allow(dead_code)]
     impl SlotPointer {
         pub fn new(position: PositionTag) -> Self {
             SlotPointer {
@@ -436,7 +423,6 @@ pub mod ob_tree {
                 if DEBUG_PRINTS {
                     log_runtime(
                         &format!("A new root with ID {} is set.", root.packet_id()),
-                        true,
                     );
                 }
                 self.root = root;
@@ -510,7 +496,7 @@ pub mod ob_tree {
                 }
             }
             pub fn initialize(enclave_state: &EnclaveState) {
-                let mut database_scheme = enclave_state.lock_database_scheme();
+                let database_scheme = enclave_state.lock_database_scheme();
                 let mut index_id_iter: u16 = 0;
                 let mut trees: HashMap<u16, ObTree> = HashMap::new();
 
@@ -530,13 +516,6 @@ pub mod ob_tree {
             }
             pub fn mut_tree(&mut self, index: &u16) -> Option<&mut ObTree> {
                 self.trees.get_mut(index)
-            }
-            pub fn insert_tree(&mut self, index: u16, tree: ObTree) {
-                assert!(!self.trees.contains_key(&index));
-                self.trees.insert(index, tree);
-            }
-            pub fn contains_tree(&self, index: &u16) -> bool {
-                self.trees.contains_key(index)
             }
             fn set_trees(&mut self, trees: HashMap<u16, ObTree>) {
                 self.trees = trees;
@@ -652,18 +631,6 @@ pub mod ob_tree {
                     _ => None,
                 }
             }
-            pub fn mut_parent_node_id(&mut self) -> Option<&mut ParentNodeId> {
-                match self {
-                    ParentNode::ParentNodeId(parent_node_id) => Some(parent_node_id),
-                    _ => None,
-                }
-            }
-            pub fn evicted_parent(&self) -> Option<&PositionTagWithoutId> {
-                match self {
-                    ParentNode::EvictedParent(my_new_pos) => Some(my_new_pos),
-                    _ => None,
-                }
-            }
             pub fn is_no_parent(&self) -> bool {
                 match self {
                     ParentNode::NoParent => true,
@@ -719,9 +686,6 @@ pub mod ob_tree {
             pub fn child_pointers(&self) -> &Vec<ObTreeChildPointer> {
                 &self.child_pointers
             }
-            pub fn child_pointer(&self, index: usize) -> Option<&ObTreeChildPointer> {
-                self.child_pointers.get(index)
-            }
             pub fn mut_child_pointer(&mut self, index: usize) -> Option<&mut ObTreeChildPointer> {
                 self.child_pointers.get_mut(index)
             }
@@ -737,8 +701,7 @@ pub mod ob_tree {
                             "swap_child_pointer - old: {}, new: {}",
                             old.position.packet_id(),
                             child_pointer.position().packet_id()
-                        ),
-                        true,
+                        )
                     );
                 }
                 self.child_pointers.insert(index, child_pointer);
@@ -777,7 +740,7 @@ pub mod ob_tree {
                         let mut query_state_cache = enclave_state.lock_query_state_cache();
                         for new_index in (index + 1)..some_meta.len() {
                             for query_iter_id in some_meta.get(new_index).unwrap().iter() {
-                                let mut query_iter =
+                                let query_iter =
                                     query_state_cache.get_mut(query_iter_id).unwrap();
                                 match query_iter.mut_parent() {
                                     None => {
@@ -808,7 +771,7 @@ pub mod ob_tree {
                 index: usize,
                 status: ObTreeTuplePointerStatus,
             ) {
-                let mut tuple_pointer_position = self
+                let tuple_pointer_position = self
                     .mut_tuple_pointer(index)
                     .unwrap()
                     .slot_pointer()
@@ -845,7 +808,7 @@ pub mod ob_tree {
                         }
                     }
                 }
-                let mut tuple_pointer = self.mut_tuple_pointer(index).unwrap();
+                let tuple_pointer = self.mut_tuple_pointer(index).unwrap();
                 tuple_pointer.set_status(status);
             }
             pub fn insert_tuple_pointer(
@@ -896,7 +859,7 @@ pub mod ob_tree {
                         let mut query_state_cache = enclave_state.lock_query_state_cache();
                         for new_index in (index + 1)..some_meta.len() {
                             for query_iter_id in some_meta.get(new_index).unwrap().iter() {
-                                let mut query_iter =
+                                let query_iter =
                                     query_state_cache.get_mut(query_iter_id).unwrap();
                                 match query_iter.mut_parent() {
                                     None => {
@@ -926,14 +889,8 @@ pub mod ob_tree {
             pub fn sub_tree_value_range(&self) -> &Option<Range<SqlDataType>> {
                 &self.sub_tree_value_range
             }
-            pub fn destroy_and_get_sub_tree_value_range(self) -> Option<Range<SqlDataType>> {
-                self.sub_tree_value_range
-            }
             pub fn mut_sub_tree_value_range(&mut self) -> &mut Option<Range<SqlDataType>> {
                 &mut self.sub_tree_value_range
-            }
-            pub fn destroy_and_return_sub_tree_value_range(self) -> Option<Range<SqlDataType>> {
-                self.sub_tree_value_range
             }
             pub fn set_sub_tree_value_range(
                 &mut self,
@@ -1014,7 +971,6 @@ pub mod ob_tree {
                                     "insert_into_query_next_traversing_meta: Query {}, index {}, child_pos_id: {}",
                                     query_id, index, self.child_pointers.get(index).unwrap().position().packet_id()
                                 ),
-                                true,
                             );
                         }
                         match some_meta.get_mut(index) {
@@ -1076,7 +1032,6 @@ pub mod ob_tree {
                                     "does_not_contain query {} in index {} of meta",
                                     query_id, index
                                 ),
-                                true,
                             );
                             for i in 0..some_meta.len() {
                                 match some_meta.get_mut(i) {
@@ -1085,7 +1040,7 @@ pub mod ob_tree {
                                     }
                                     Some(some_meta_vec) => {
                                         if some_meta_vec.contains(query_id) {
-                                            log_runtime(&format!("but i {} contains", i), true);
+                                            log_runtime(&format!("but i {} contains", i));
                                             break;
                                         }
                                     }
@@ -1241,7 +1196,7 @@ pub mod ob_tree {
                     let child_id = child.position().copy_packet_id();
                     match obt_node_cache.mut_node(&child_id) {
                         None => {}
-                        Some(mut some_child_node) => match some_child_node.parent_node() {
+                        Some(some_child_node) => match some_child_node.parent_node() {
                             ParentNode::ParentNodeId(_) => {
                                 let new_child_pos = {
                                     let oram_config = enclave_state.lock_oram_config();
@@ -1300,7 +1255,7 @@ pub mod ob_tree {
                     .packet_id()
                     != child_node_id
                 {
-                    log_runtime(&format!("index in parent: {}", chosen_path), true);
+                    log_runtime(&format!("index in parent: {}", chosen_path));
                     panic!("parent points to != real current node id");
                 }
             }
@@ -1339,6 +1294,7 @@ pub mod ob_tree {
             leaf_slots: Option<u16>,
         }
 
+        #[allow(dead_code)]
         impl ObTreeChildPointer {
             pub fn position(&self) -> &PositionTag {
                 &self.position
@@ -1372,6 +1328,7 @@ pub mod ob_tree {
             status: ObTreeTuplePointerStatus,
         }
 
+        #[allow(dead_code)]
         impl ObTreeTuplePointer {
             pub fn new(key: Vec<u8>, slot_pointer: SlotPointer) -> Self {
                 ObTreeTuplePointer {
@@ -1416,6 +1373,7 @@ pub mod ob_tree {
         }
 
         impl ObTreeTuplePointerStatus {
+            #[allow(dead_code)]
             pub fn is_removed(&self) -> bool {
                 match self {
                     ObTreeTuplePointerStatus::ACTIVE => false,
@@ -1440,15 +1398,19 @@ pub mod ob_tree {
             pub fn upper(&self) -> &SqlDataType {
                 &self.upper
             }
+            #[allow(dead_code)]
             pub fn set_lower(&mut self, lower: SqlDataType) {
                 self.lower = lower;
             }
+            #[allow(dead_code)]
             pub fn set_upper(&mut self, upper: SqlDataType) {
                 self.upper = upper;
             }
+            #[allow(dead_code)]
             pub fn destroy_and_return_components(self) -> (SqlDataType, SqlDataType) {
                 (self.lower, self.upper)
             }
+            #[allow(dead_code)]
             pub fn extend(&mut self, other: ObTreeQueryValueRange) {
                 let other_range = other.destroy_and_return_components();
                 if self.lower().cmp(&other_range.0).is_gt() {
@@ -1458,19 +1420,23 @@ pub mod ob_tree {
                     self.upper = other_range.1;
                 }
             }
+            #[allow(dead_code)]
             pub fn extend_lower(&mut self, other: SqlDataType) {
                 if self.lower().cmp(&other).is_gt() {
                     self.lower = other;
                 }
             }
+            #[allow(dead_code)]
             pub fn extend_upper(&mut self, other: SqlDataType) {
                 if self.upper().cmp(&other).is_lt() {
                     self.upper = other;
                 }
             }
+            #[allow(dead_code)]
             pub fn intersects(&self, other: &ObTreeQueryValueRange) -> bool {
                 self.cmp(other).is_eq()
             }
+            #[allow(dead_code)]
             pub fn contains(&self, other: &SqlDataType) -> bool {
                 self.lower().cmp(other).is_le() && self.upper().cmp(other).is_ge()
             }
@@ -1511,18 +1477,21 @@ pub mod ob_tree {
                     ObTreeQueryValue::Range(_) => None,
                 }
             }
+            #[allow(dead_code)]
             pub fn range(&self) -> Option<&ObTreeQueryValueRange> {
                 match self {
                     ObTreeQueryValue::Single(_) => None,
                     ObTreeQueryValue::Range(range) => Some(range),
                 }
             }
+            #[allow(dead_code)]
             pub fn mut_range(&mut self) -> Option<&mut ObTreeQueryValueRange> {
                 match self {
                     ObTreeQueryValue::Single(_) => None,
                     ObTreeQueryValue::Range(range) => Some(range),
                 }
             }
+            #[allow(dead_code)]
             pub fn clone_as_range(&self) -> Range<SqlDataType> {
                 match self {
                     ObTreeQueryValue::Single(single) => Range::new(single.clone(), single.clone()),
@@ -1531,6 +1500,7 @@ pub mod ob_tree {
                     }
                 }
             }
+            #[allow(dead_code)]
             pub fn intersects(&self, other: &ObTreeQueryValue) -> bool {
                 return match self {
                     ObTreeQueryValue::Single(single) => match other {
@@ -1643,6 +1613,7 @@ pub mod ob_tree {
         }
 
         // Searches for a key range in a vector of tuple pointers
+        #[allow(dead_code)]
         pub fn search_range_value_in_node_tuple_pointers(
             statistics: &mut EnclaveStatistics,
             tuple_pointers: &Vec<ObTreeTuplePointer>,
@@ -1740,9 +1711,9 @@ pub mod ob_tree {
             index_to_insert: usize,
         ) {
             let mut obt_node_cache = enclave_state.lock_obt_node_cache();
-            let mut node = obt_node_cache.mut_node(&current_node_id).unwrap();
+            let node = obt_node_cache.mut_node(&current_node_id).unwrap();
 
-            let mut slot_content = query_state
+            let slot_content = query_state
                 .operation_type()
                 .get_insert_query_state()
                 .unwrap()
@@ -1918,7 +1889,7 @@ pub mod ob_tree {
                                 .unwrap()
                                 .copy_cache_id();
                             // The predecessor is also a RID chain item, i.e. a slot.
-                            let mut predecessor_slot =
+                            let predecessor_slot =
                                 slot_cache.mut_slot(&predecessor_slot_id).unwrap();
                             // Check if any query has visited the predecessor and visits the current slot as next step.
                             if predecessor_slot
@@ -1975,7 +1946,7 @@ pub mod ob_tree {
                 let parent_node_tuple_index = parent_node_id.chosen_path() as usize;
 
                 // The parent node that points to the slot
-                let mut parent_node =
+                let parent_node =
                     obt_node_cache
                         .mut_node(parent_node_id.cache_id())
                         .expect(&format!(
@@ -2123,7 +2094,7 @@ pub mod ob_tree {
                 }
                 ParentNode::ParentNodeId(some_parent_id) => {
                     let mut obt_node_cache = enclave_state.lock_obt_node_cache();
-                    let mut parent_node = obt_node_cache
+                    let parent_node = obt_node_cache
                         .mut_node(some_parent_id.cache_id())
                         .expect(&format!(
                             "Parent node {} does not exists.",
@@ -2154,7 +2125,7 @@ pub mod ob_tree {
                             current_node.broadcast_eviction_to_children(enclave_state);
 
                             let mut obt_node_cache = enclave_state.lock_obt_node_cache();
-                            let mut parent_node = obt_node_cache
+                            let parent_node = obt_node_cache
                                 .mut_node(some_parent_id.cache_id())
                                 .expect("Parent node does not exists.");
 
@@ -2289,13 +2260,13 @@ pub mod ob_tree {
             };
             let new_pos_right_id = right_node_tag;
             if DEBUG_PRINTS {
-                log_runtime(&format!("New left node: {}", pos_left_id), true);
-                log_runtime(&format!("right node: {}", right_node_tag), true);
+                log_runtime(&format!("New left node: {}", pos_left_id));
+                log_runtime(&format!("right node: {}", right_node_tag));
             }
 
             let mut tuple_pointers_to_split = right_node.tuple_pointers().clone();
-            let mut child_pointers_to_split = right_node.child_pointers().clone();
-            let mut traverse_meta_to_split =
+            let child_pointers_to_split = right_node.child_pointers().clone();
+            let traverse_meta_to_split =
                 right_node.remove_complete_query_next_traversing_meta();
             let mut tuple_meta_to_split = right_node.remove_complete_query_next_tuple_meta();
             let middle = tuple_pointers_to_split.remove(enclave_state.fill_grade());
@@ -2409,7 +2380,7 @@ pub mod ob_tree {
                             assert_eq!(traverse_meta.len(), (fill_grade + 1));
                             for (index, entry) in traverse_meta.iter().enumerate() {
                                 for query_iter in entry.iter() {
-                                    let mut query_iter_state = query_state_cache
+                                    let query_iter_state = query_state_cache
                                         .get_mut(query_iter)
                                         .expect("Query state must exists in cache.");
                                     match query_iter_state.mut_parent() {
@@ -2446,7 +2417,7 @@ pub mod ob_tree {
                             assert_eq!(traverse_meta.len(), (fill_grade + 1));
                             for (index, entry) in traverse_meta.iter().enumerate() {
                                 for query_iter in entry.iter() {
-                                    let mut query_iter_state = query_state_cache
+                                    let query_iter_state = query_state_cache
                                         .get_mut(query_iter)
                                         .expect("Query state must exists in cache.");
                                     match query_iter_state.mut_parent() {
@@ -2500,7 +2471,7 @@ pub mod ob_tree {
                             assert_eq!(tuple_meta.len(), fill_grade);
                             for (index, entry) in tuple_meta.iter().enumerate() {
                                 for query_iter in entry.iter() {
-                                    let mut query_iter_state = query_state_cache
+                                    let query_iter_state = query_state_cache
                                         .get_mut(query_iter)
                                         .expect("Query state must exists in cache.");
                                     match query_iter_state.mut_parent() {
@@ -2542,7 +2513,7 @@ pub mod ob_tree {
                             assert_eq!(tuple_meta.len(), fill_grade);
                             for (index, entry) in tuple_meta.iter().enumerate() {
                                 for query_iter in entry.iter() {
-                                    let mut query_iter_state = query_state_cache
+                                    let query_iter_state = query_state_cache
                                         .get_mut(query_iter)
                                         .expect("Query state must exists in cache.");
                                     match query_iter_state.mut_parent() {
@@ -2594,7 +2565,7 @@ pub mod ob_tree {
                 Some(some_do_not_evict) => {
                     for query_id_iter in some_do_not_evict {
                         let mut query_state_cache = enclave_state.lock_query_state_cache();
-                        let mut query_iter = query_state_cache.get_mut(&query_id_iter).unwrap();
+                        let query_iter = query_state_cache.get_mut(&query_id_iter).unwrap();
 
                         if query_iter
                             .ob_tree_query()
@@ -2733,7 +2704,6 @@ pub mod ob_tree {
                         "split_node - parent: {}",
                         parent_node.parent_node_id().unwrap().cache_id()
                     ),
-                    true,
                 );
             }
 
@@ -2752,7 +2722,6 @@ pub mod ob_tree {
                             pos_left_id,
                             pos_left.path()
                         ),
-                        true,
                     );
                 }
                 new_left_node.broadcast_eviction_to_children(enclave_state);
@@ -2792,8 +2761,7 @@ pub mod ob_tree {
                             right_node_tag,
                             new_pos_right_id,
                             new_pos_right.path()
-                        ),
-                        true,
+                        )
                     );
                 }
                 right_node.broadcast_eviction_to_children(enclave_state);
@@ -2921,7 +2889,7 @@ pub mod ob_tree {
                         Some(some_middle_tuple_meta) => {
                             let mut query_state_cache = enclave_state.lock_query_state_cache();
                             for query_iter in some_middle_tuple_meta.iter() {
-                                let mut query_iter_state = query_state_cache
+                                let query_iter_state = query_state_cache
                                     .get_mut(query_iter)
                                     .expect("Query state must exists in cache.");
                                 match query_iter_state.mut_parent() {
@@ -2989,7 +2957,7 @@ pub mod ob_tree {
                         .insert_node(new_root_pos.copy_packet_id(), new_root);
                     {
                         let mut obt_directory = enclave_state.lock_obt_tree_directory();
-                        let mut tree = obt_directory
+                        let tree = obt_directory
                             .mut_tree(&index_id)
                             .expect("Index tree must exist.");
                         tree.set_root(new_root_pos);
@@ -3013,13 +2981,11 @@ pub mod ob_tree {
                                 "cast_split_to_parent: Parent ID: {}",
                                 some_parent_node_id.cache_id()
                             ),
-                            true,
                         );
                     }
 
                     // ID of parent:
                     let (parent_node_tag, parent_node_path) = some_parent_node_id.destroy();
-                    let mut queries_shifted_to_parent_node = false;
 
                     let mut parent_node = enclave_state
                         .lock_obt_node_cache()
@@ -3040,7 +3006,6 @@ pub mod ob_tree {
                                         .position()
                                         .packet_id()
                                 ),
-                                true,
                             );
                         }
                         let grandparent_node_id = parent_node.parent_node().clone();
@@ -3053,7 +3018,7 @@ pub mod ob_tree {
                                 //let parent_node_position = PositionTag::from_string(&parent_node_tag);
                                 let mut query_state_cache = enclave_state.lock_query_state_cache();
                                 for query_id_iter in some_traversing_meta_entry.iter() {
-                                    let mut query =
+                                    let query =
                                         query_state_cache.get_mut(query_id_iter).expect(&format!(
                                             "Could not found query {} in query_state_cache.",
                                             query_id_iter
@@ -3064,7 +3029,7 @@ pub mod ob_tree {
                                             query.set_next(NextPos::Start);
                                         }
                                         ParentNode::ParentNodeId(some_grandparent_node_id) => {
-                                            let mut grandparent_node = obt_node_cache
+                                            let grandparent_node = obt_node_cache
                                                 .mut_node(some_grandparent_node_id.cache_id())
                                                 .unwrap();
                                             grandparent_node
@@ -3085,9 +3050,8 @@ pub mod ob_tree {
                                                             some_next_pos
                                                                 .set_packet_id(parent_node_tag);
                                                             if DEBUG_PRINTS {
-                                                                log_runtime(&format!("Query {} is reassigned to parent node {}", query_id_iter, parent_node_tag), true);
+                                                                log_runtime(&format!("Query {} is reassigned to parent node {}", query_id_iter, parent_node_tag));
                                                             }
-                                                            queries_shifted_to_parent_node = true;
                                                         }
                                                         _ => {
                                                             panic!("Cannot be this case.");
@@ -3137,7 +3101,7 @@ pub mod ob_tree {
                             Some(some_middle_tuple_meta) => {
                                 let mut query_state_cache = enclave_state.lock_query_state_cache();
                                 for query_iter in some_middle_tuple_meta.iter() {
-                                    let mut query_iter_state = query_state_cache
+                                    let query_iter_state = query_state_cache
                                         .get_mut(query_iter)
                                         .expect("Query state must exists in cache.");
                                     match query_iter_state.mut_parent() {
@@ -3281,7 +3245,7 @@ pub mod ob_tree {
                             query_state.parent_ref().unwrap().node().unwrap().clone();
                         {
                             let mut obt_node_cache = enclave_state.lock_obt_node_cache();
-                            let mut parent_node =
+                            let parent_node =
                                 obt_node_cache.mut_node(parent_node_id.cache_id()).unwrap();
                             parent_node.remove_query_from_query_next_tuple_meta(
                                 parent_node_id.chosen_path() as usize,
@@ -3318,7 +3282,7 @@ pub mod ob_tree {
                     // A node is a leaf when it has no child pointers
                     let is_leaf = {
                         let mut obt_node_cache = enclave_state.lock_obt_node_cache();
-                        let mut node = obt_node_cache
+                        let node = obt_node_cache
                             .mut_node(current_position.packet_id())
                             .expect(&format!(
                                 "Node {} is not in cache for query {}.",
@@ -3389,7 +3353,7 @@ pub mod ob_tree {
                             ParentNode::ParentNodeId(parent_node_id) => {
                                 {
                                     let mut obt_node_cache = enclave_state.lock_obt_node_cache();
-                                    let mut parent_node = obt_node_cache
+                                    let parent_node = obt_node_cache
                                         .mut_node(parent_node_id.cache_id())
                                         .expect("Parent node must be in cache.");
                                     parent_node.searched_child_node_is_fetched_now(
@@ -3419,7 +3383,7 @@ pub mod ob_tree {
                     }
 
                     let mut obt_node_cache = enclave_state.lock_obt_node_cache();
-                    let mut node = obt_node_cache
+                    let node = obt_node_cache
                         .mut_node(current_position.packet_id())
                         .unwrap();
 
@@ -3530,7 +3494,7 @@ pub mod ob_tree {
                                                     let mut obt_node_cache =
                                                         enclave_state.lock_obt_node_cache();
 
-                                                    let mut parent_node = obt_node_cache
+                                                    let parent_node = obt_node_cache
                                                         .mut_node(parent_node_id.cache_id())
                                                         .unwrap();
 
@@ -3692,7 +3656,7 @@ pub mod ob_tree {
                                     let parent_node_id =
                                         slot.parent().as_ref().unwrap().node().unwrap();
                                     let mut obt_node_cache = enclave_state.lock_obt_node_cache();
-                                    let mut node =
+                                    let node =
                                         obt_node_cache.mut_node(parent_node_id.cache_id()).unwrap();
                                     node.set_tuple_pointer_status(
                                         enclave_state,
@@ -3716,7 +3680,7 @@ pub mod ob_tree {
                                             // must be active
                                             let mut obt_node_cache =
                                                 enclave_state.lock_obt_node_cache();
-                                            let mut parent_node = obt_node_cache
+                                            let parent_node = obt_node_cache
                                                 .mut_node(parent_node_id.cache_id())
                                                 .unwrap();
                                             parent_node.set_tuple_pointer_status(
@@ -3731,7 +3695,7 @@ pub mod ob_tree {
                                 ParentId::Slot(parent_slot_id) => {
                                     // If predecessor was a slot,
                                     // we must remove current query id from its meta
-                                    let mut parent_slot =
+                                    let parent_slot =
                                         slot_cache.mut_slot(parent_slot_id.cache_id()).unwrap();
                                     parent_slot
                                         .mut_content()
@@ -3788,7 +3752,7 @@ pub mod ob_tree {
                                                                 for other_query_id in
                                                                 some_meta_entry.iter()
                                                                 {
-                                                                    let mut other_query =
+                                                                    let other_query =
                                                                         query_state_cache
                                                                             .get_mut(other_query_id)
                                                                             .unwrap();
@@ -3811,7 +3775,7 @@ pub mod ob_tree {
                                                         }
                                                     }
                                                 }
-                                                let mut tuple_pointer = parent_node
+                                                let tuple_pointer = parent_node
                                                     .mut_tuple_pointer(
                                                         parent_node_id.chosen_path() as usize
                                                     )
@@ -3820,7 +3784,7 @@ pub mod ob_tree {
                                                     .set_slot_pointer(slot_pointer_predecessor);
                                             }
                                             ParentId::Slot(parent_slot_id) => {
-                                                let mut parent_slot = slot_cache
+                                                let parent_slot = slot_cache
                                                     .mut_slot(parent_slot_id.cache_id())
                                                     .unwrap();
                                                 match parent_slot
@@ -3834,7 +3798,7 @@ pub mod ob_tree {
                                                         let mut query_state_cache =
                                                             enclave_state.lock_query_state_cache();
                                                         for other_query_id in some_visited.iter() {
-                                                            let mut other_query = query_state_cache
+                                                            let other_query = query_state_cache
                                                                 .get_mut(other_query_id)
                                                                 .unwrap();
                                                             other_query.set_next(NextPos::Request(
@@ -3897,7 +3861,7 @@ pub mod ob_tree {
                                                         .unwrap();
                                                     let mut obt_node_cache =
                                                         enclave_state.lock_obt_node_cache();
-                                                    let mut node = obt_node_cache
+                                                    let node = obt_node_cache
                                                         .mut_node(parent_node_id.cache_id())
                                                         .unwrap();
                                                     node.set_tuple_pointer_status(
@@ -3941,7 +3905,7 @@ pub mod ob_tree {
                                                                 let mut obt_node_cache =
                                                                     enclave_state
                                                                         .lock_obt_node_cache();
-                                                                let mut node = obt_node_cache
+                                                                let node = obt_node_cache
                                                                     .mut_node(
                                                                         parent_node_id.cache_id(),
                                                                     )
@@ -4010,7 +3974,7 @@ pub mod ob_tree {
                         match parent_id {
                             ParentId::Node(_) => {}
                             ParentId::Slot(parent_slot_id) => {
-                                let mut parent_slot =
+                                let parent_slot =
                                     slot_cache.mut_slot(parent_slot_id.cache_id()).unwrap();
                                 parent_slot
                                     .mut_content()
@@ -4056,6 +4020,7 @@ pub mod ob_tree {
         use oblivious_data_structures::position_tag::PositionTag;
         use {log_runtime, EnclaveState};
 
+        #[allow(dead_code)]
         pub fn evict_all_roots(enclave_state: &EnclaveState) {
             let mut obt_node_cache = enclave_state.lock_obt_node_cache();
             let slot_cache = enclave_state.lock_slot_cache();
@@ -4071,7 +4036,6 @@ pub mod ob_tree {
                         {
                             log_runtime(
                                 "evict_all_roots cannot be applied, cache is not empty!",
-                                true,
                             );
                             return;
                         }

@@ -27,20 +27,6 @@ pub mod sql_data_types {
             AbstractSQLNull,
         }
 
-        impl SqlAbstractDataType {
-            pub fn distribution_mappable(&self) -> bool {
-                match self {
-                    SqlAbstractDataType::AbstractSQLInteger => true,
-                    SqlAbstractDataType::AbstractSQLBool => false,
-                    SqlAbstractDataType::AbstractSQLText => true,
-                    SqlAbstractDataType::AbstractSQLDate => true,
-                    SqlAbstractDataType::AbstractSQLDateTime => true,
-                    SqlAbstractDataType::AbstractSQLTime => true,
-                    SqlAbstractDataType::AbstractSQLNull => false,
-                }
-            }
-        }
-
         #[derive(Serialize, Deserialize, Clone, Eq, PartialEq)]
         pub enum SqlDataType {
             //SQLTinyInt(i8),
@@ -109,9 +95,11 @@ pub mod sql_data_types {
                 }
                 return true;
             }
+            #[allow(dead_code)]
             pub fn byte_size(&self) -> usize {
                 bincode::serialized_size(self).expect("") as usize
             }
+            #[allow(dead_code)]
             pub fn sql_integer(&self) -> Option<&i64> {
                 match self {
                     SqlDataType::SQLInteger(val) => Some(val),
@@ -148,12 +136,14 @@ pub mod sql_data_types {
                 };
             }
              */
+            #[allow(dead_code)]
             pub fn sql_bool(&self) -> Option<&bool> {
                 match self {
                     SqlDataType::SQLBool(val) => Some(val),
                     _ => None,
                 }
             }
+            #[allow(dead_code)]
             pub fn sql_text(&self) -> Option<&String> {
                 match self {
                     SqlDataType::SQLText(val) => Some(val),
@@ -166,6 +156,7 @@ pub mod sql_data_types {
                     _ => None,
                 }
             }
+            #[allow(dead_code)]
             pub fn sql_date_to_date_obj(&self) -> Option<Date<Utc>> {
                 return match self.sql_date() {
                     None => None,
@@ -187,6 +178,7 @@ pub mod sql_data_types {
                     _ => None,
                 }
             }
+            #[allow(dead_code)]
             pub fn sql_datetime_to_datetime_obj(&self) -> Option<DateTime<Utc>> {
                 return match self.sql_datetime() {
                     None => None,
@@ -214,6 +206,7 @@ pub mod sql_data_types {
                     _ => None,
                 }
             }
+            #[allow(dead_code)]
             pub fn sql_time_to_time_obj(&self) -> Option<NaiveTime> {
                 return match self.sql_time() {
                     None => None,
@@ -224,6 +217,7 @@ pub mod sql_data_types {
                     )),
                 };
             }
+            #[allow(dead_code)]
             pub fn is_sql_null(&self) -> bool {
                 match self {
                     SqlDataType::SQLNull => true,
@@ -472,6 +466,7 @@ pub mod sql_data_types {
         use crate::sql_engine::sql_data_types::components::*;
         use crate::sql_engine::sql_database::components::SqlAttribute;
 
+        #[allow(dead_code)]
         pub fn date_obj_to_sql_date(date: Date<Utc>) -> SqlDataType {
             return SqlDataType::SQLDate {
                 day: date.day() as u8,
@@ -480,6 +475,7 @@ pub mod sql_data_types {
             };
         }
 
+        #[allow(dead_code)]
         pub fn datetime_obj_to_sql_datetime(datetime: DateTime<Utc>) -> SqlDataType {
             return SqlDataType::SQLDateTime {
                 day: datetime.day() as u8,
@@ -491,6 +487,7 @@ pub mod sql_data_types {
             };
         }
 
+        #[allow(dead_code)]
         pub fn time_obj_to_sql_time(time: NaiveTime) -> SqlDataType {
             return SqlDataType::SQLTime {
                 hour: time.hour() as u8,
@@ -499,6 +496,7 @@ pub mod sql_data_types {
             };
         }
 
+        #[allow(dead_code)]
         pub fn create_sql_type_by_str(
             data: &str,
             sql_type: &SqlAbstractDataType,
@@ -883,11 +881,13 @@ pub mod sql_query {
     use crate::sql_engine::sql_data_types::components::SqlDataType;
     use crate::utils::Pair;
 
+    #[allow(dead_code)]
     pub struct QueryNewRow {
         table: u32,
         row: SqlTableRow,
     }
 
+    #[allow(dead_code)]
     impl QueryNewRow {
         pub fn new(table: u32, row: SqlTableRow) -> Self {
             QueryNewRow { table, row }
@@ -903,11 +903,13 @@ pub mod sql_query {
         }
     }
 
+    #[allow(dead_code)]
     pub struct QueryNewValues {
         table: u32,
         attributes: HashMap<u32, SqlDataType>,
     }
 
+    #[allow(dead_code)]
     impl QueryNewValues {
         pub fn new(table: u32, attributes: HashMap<u32, SqlDataType>) -> Self {
             QueryNewValues { table, attributes }
@@ -926,11 +928,13 @@ pub mod sql_query {
         }
     }
 
+    #[allow(dead_code)]
     pub struct QueryFilter {
         table: String,
         attributes: HashMap<u32, Pair<SqlDataType, CmpOperator>>,
     }
 
+    #[allow(dead_code)]
     impl QueryFilter {
         pub fn new(
             table: String,
@@ -943,12 +947,6 @@ pub mod sql_query {
         }
         pub fn attributes(&self) -> &HashMap<u32, Pair<SqlDataType, CmpOperator>> {
             &self.attributes
-        }
-        pub fn set_table(&mut self, table: String) {
-            self.table = table;
-        }
-        pub fn set_attributes(&mut self, attributes: HashMap<u32, Pair<SqlDataType, CmpOperator>>) {
-            self.attributes = attributes;
         }
     }
 
@@ -969,10 +967,7 @@ pub mod sql_database {
         use std::vec::Vec;
         use logger::log_runtime;
         use query_state::ObTreeSlotContentFilter;
-        use sql_engine::sql_query::{QueryNewRow};
         use crate::sql_engine::sql_data_types::components::{SqlAbstractDataType, SqlDataType};
-        use crate::sql_engine::sql_data_types::functions::display_sql_data_type;
-        use crate::sql_engine::sql_query::{QueryFilter, QueryNewValues};
 
         #[derive(Serialize, Deserialize, Clone)]
         pub struct SqlDatabaseScheme {
@@ -986,17 +981,6 @@ pub mod sql_database {
             }
             pub fn tables(&self) -> &Vec<SqlTableScheme> {
                 &self.tables
-            }
-            pub fn mut_tables(&mut self) -> &mut Vec<SqlTableScheme> {
-                &mut self.tables
-            }
-            pub fn get_table_scheme(&self, name: &String) -> Option<&SqlTableScheme> {
-                for table in self.tables() {
-                    if table.name().eq(name) {
-                        return Some(table);
-                    }
-                }
-                return None;
             }
             pub fn get_table_scheme_by_str(&self, name: &str) -> Option<&SqlTableScheme> {
                 for table in self.tables() {
@@ -1014,17 +998,12 @@ pub mod sql_database {
                         table.attributes().len(),
                         self.name()
                     ),
-                    false,
                 );
                 self.tables.push(table);
-            }
-            pub fn new(name: String, tables: Vec<SqlTableScheme>) -> Self {
-                SqlDatabaseScheme { name, tables }
             }
             pub fn new_empty(name: String) -> Self {
                 log_runtime(
                     &format!("An empty database with the name {} has been created.", name),
-                    false,
                 );
                 SqlDatabaseScheme {
                     name,
@@ -1070,9 +1049,6 @@ pub mod sql_database {
         }
 
         impl SqlAttribute {
-            pub fn name(&self) -> &str {
-                &self.name
-            }
             pub fn data_type(&self) -> &SqlAbstractDataType {
                 &self.data_type
             }
@@ -1083,11 +1059,9 @@ pub mod sql_database {
                     unique,
                 }
             }
-            pub fn unique(&self) -> bool {
-                self.unique
-            }
         }
 
+        /*
         #[derive()]
         pub enum SqlDmlOperation {
             SELECT,
@@ -1150,16 +1124,8 @@ pub mod sql_database {
             pub fn set_where_condition(&mut self, where_condition: Option<Vec<QueryFilter>>) {
                 self.where_condition = where_condition;
             }
-            pub fn values(&self) -> &Option<SqlQueryValues> {
-                &self.values
-            }
-            pub fn mut_values(&mut self) -> &mut Option<SqlQueryValues> {
-                &mut self.values
-            }
-            pub fn set_values(&mut self, values: Option<SqlQueryValues>) {
-                self.values = values;
-            }
         }
+         */
 
         #[derive(Serialize, Deserialize, Clone)]
         pub struct SqlTableRow {
@@ -1176,9 +1142,7 @@ pub mod sql_database {
             pub fn get_value(&self, index: usize) -> Option<&SqlDataType> {
                 self.values.get(index)
             }
-            pub fn mut_values(&mut self) -> &mut Vec<SqlDataType> {
-                &mut self.values
-            }
+            /*
             pub fn display(&self) -> String {
                 let mut result: String = String::from("");
                 for val in self.values.iter() {
@@ -1187,6 +1151,7 @@ pub mod sql_database {
                 }
                 result
             }
+             */
             pub fn byte_size(&self) -> usize {
                 bincode::serialized_size(self).expect("") as usize
             }

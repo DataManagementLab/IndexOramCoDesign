@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-pub fn log_runtime(message: &str, console: bool) {
+pub fn log_runtime(message: &str) {
     println!("{}", message);
 }
 
@@ -10,6 +10,7 @@ pub struct StatisticsToSend {
     evicted_packets_in_batch: usize,
 }
 
+#[allow(dead_code)]
 impl StatisticsToSend {
     pub fn free_oram_space_after(&self) -> f64 {
         self.free_oram_space_after

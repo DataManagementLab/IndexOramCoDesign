@@ -110,7 +110,7 @@ pub fn setup_oram(enclave_state: &EnclaveState) {
 
         assert_eq!(number_of_already_sent_buckets, number_of_nodes);
     }
-    log_runtime("Initial ORAM generation by the enclave has finished.", true);
+    log_runtime("Initial ORAM generation by the enclave has finished.");
 }
 
 pub fn check_environment(oram_config: &OramConfig) {
@@ -127,7 +127,6 @@ pub fn check_environment(oram_config: &OramConfig) {
 
 fn create_dynamic_config(
     index_locality_cache: bool,
-    bucket_size: usize,
     min_matching_prefix_level: u32,
 ) -> DynamicConfig {
     let mut shared_key = [0u8; crate::SHARED_KEY_LEN];
@@ -137,10 +136,9 @@ fn create_dynamic_config(
         shared_key[i] = a_byte;
     }
 
-    let mut dummy_nonce_provider = NonceProvider::new();
-    let dummy_bucket_content = BucketContent::new_as_dummy((0, 0), bucket_size);
-    let bucket_content_byte_size =
-        bincode::serialized_size(&dummy_bucket_content).expect("") as usize;
+    // let mut dummy_nonce_provider = NonceProvider::new();
+    // let dummy_bucket_content = BucketContent::new_as_dummy((0, 0), bucket_size);
+    //let bucket_content_byte_size = bincode::serialized_size(&dummy_bucket_content).expect("") as usize;
 
     /*
     let bucket1 = dummy_bucket_content.encrypt_to_bucket(&shared_key, dummy_nonce_provider.make_nonce());
@@ -241,12 +239,7 @@ pub fn prepare_ycsb_obt(
     active_index_locality_flag: bool,
     oram_config: OramConfig,
 ) -> EnclaveState {
-    let mut database_scheme = prepare_ycsb_database();
-    let number_of_trees = database_scheme
-        .get_table_scheme_by_str("usertable")
-        .unwrap()
-        .attributes()
-        .len();
+    let database_scheme = prepare_ycsb_database();
 
     let index_locality_cache: Option<IndexLocalityCache> = if active_index_locality_flag {
         println!("Index Locality Cache is active");
@@ -256,12 +249,10 @@ pub fn prepare_ycsb_obt(
         None
     };
 
-    let bucket_size = oram_config.bucket_size();
     let standard_min_matching_prefix_level = oram_config.tree_height() - 1;
     let enclave_state = EnclaveState::new(
         SgxMutex::new(create_dynamic_config(
             index_locality_cache.is_some(),
-            bucket_size,
             standard_min_matching_prefix_level as u32,
         )),
         SgxMutex::new(PacketStash::new_empty()),
@@ -288,6 +279,7 @@ pub fn prepare_ycsb_obt(
     enclave_state
 }
 
+#[allow(dead_code)]
 pub fn generate_rows(
     amount: usize,
     table_scheme: &SqlTableScheme,
@@ -333,7 +325,7 @@ pub fn generate_row(table_scheme: &SqlTableScheme) -> (SqlTableRow, SqlDataType,
                     text
                 } else {
                     let len: usize = rng.gen_range(1, 100);
-                    let mut text = generate_random_rid(len);
+                    let text = generate_random_rid(len);
                     text
                 };
                 let val = SqlDataType::SQLText(val);

@@ -1,13 +1,6 @@
-
 use serde::{Deserialize, Serialize};
-
 use std::collections::{HashMap};
-
-
-use std::untrusted::time::InstantEx;
 use std::vec::Vec;
-
-
 use oblivious_data_structures::ob_tree::components::Origin;
 use oblivious_ram::components::{BucketContentForLocal};
 use oblivious_ram::functions::{
@@ -17,7 +10,6 @@ use oblivious_ram::functions::{
 use oblivious_ram::packaging::Packet;
 use query_state::ObjectType;
 use {PRINT_PACKET_EVICTIONS};
-
 use crate::enclave_state::EnclaveState;
 use crate::helpers::oram_helper::get_number_of_leaves;
 use crate::oblivious_data_structures::position_tag::PositionTag;
@@ -51,6 +43,7 @@ impl PacketStash {
             Some(oram) => Some(oram),
         };
     }
+    #[allow(dead_code)]
     pub fn path_of_oram(&self, oram_id: u32, path_id: u32) -> Option<&Vec<Packet>> {
         match self.stash.get(&oram_id) {
             None => {
@@ -176,18 +169,6 @@ impl PacketStash {
         evicted_packets
     }
 
-    pub fn byte_size(&self) -> u64 {
-        let mut byte_size: u64 = 0;
-        for (_oram_id, oram) in self.stash.iter() {
-            for (_path, packets) in oram.iter() {
-                for packet in packets.iter() {
-                    byte_size += packet.byte_size() as u64;
-                }
-            }
-        }
-        byte_size
-    }
-
     pub fn number_of_packets(&self) -> usize {
         let mut number: usize = 0;
         for (_oram_id, oram) in self.stash.iter() {
@@ -228,16 +209,7 @@ impl PacketStash {
         )
     }
 
-    pub fn number_of_packets_in_path(&self, oram_id: u32, path: u32) -> usize {
-        return match self.stash.get(&oram_id) {
-            None => 0,
-            Some(oram) => match oram.get(&path) {
-                None => 0,
-                Some(path) => path.len(),
-            },
-        };
-    }
-
+    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.number_of_packets() == 0
         /*
@@ -396,7 +368,7 @@ impl PacketStash {
 }
 
 /// Should not be used in production
-pub fn clear_to_oram(enclave_state: &EnclaveState) -> usize {
+pub fn clear_to_oram(enclave_state: &EnclaveState) {
     let (bounded_locality_cache_before, keep_not_requested_in_buckets_before) = {
         let mut dynamic_config = enclave_state.lock_dynamic_config();
         let bounded_locality_cache = dynamic_config.bounded_locality_cache();
@@ -407,14 +379,12 @@ pub fn clear_to_oram(enclave_state: &EnclaveState) -> usize {
     };
 
     {
-        let mut packet_stash = enclave_state.lock_packet_stash();
+        let packet_stash = enclave_state.lock_packet_stash();
         println!(
             "clear_to_oram: packet_stash has size of {} before",
             packet_stash.number_of_packets()
         );
     }
-
-    let mut evicted_packets = 0;
 
     let (number_of_oram, oram_degree, oram_tree_height) = {
         let oram_config = enclave_state.lock_oram_config();
@@ -465,5 +435,4 @@ pub fn clear_to_oram(enclave_state: &EnclaveState) -> usize {
         );
         packet_stash.shrink_to_fit();
     }
-    evicted_packets
 }

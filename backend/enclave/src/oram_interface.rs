@@ -1,8 +1,8 @@
-use core::ops::Add;
 use serde::{Deserialize, Serialize};
 use std::string::{String, ToString};
 use std::vec::Vec;
 
+#[allow(dead_code)]
 #[derive(Serialize, Deserialize)]
 pub enum GenericRequestToServer {
     TestMsg(String),
@@ -20,6 +20,7 @@ impl GenericRequestToServer {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Serialize, Deserialize)]
 pub struct ByteObject {
     header: String,
@@ -41,6 +42,7 @@ impl ByteObject {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Serialize, Deserialize)]
 pub enum GenericRequestToEnclave {
     InitEnclave(InitEnclaveConfig),
@@ -52,12 +54,14 @@ pub enum GenericRequestToEnclave {
     ORAMBenchmark,
 }
 
+#[allow(dead_code)]
 impl GenericRequestToEnclave {
     pub fn serialize(&self) -> Vec<u8> {
         bincode::serialize(self).expect("Serializing the request has not worked out.")
     }
 }
 
+#[allow(dead_code)]
 #[derive(Serialize, Deserialize)]
 pub struct InitEnclaveConfig {
     number_of_oram: usize,
@@ -89,6 +93,7 @@ impl InitEnclaveConfig {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Serialize, Deserialize)]
 pub struct ResourceUsageReport {
     stash_number_of_packets: u64,
@@ -137,6 +142,7 @@ impl ResourceUsageReport {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Serialize, Deserialize)]
 pub struct EnvironmentVariables {
     number_of_oram: usize,
@@ -147,6 +153,7 @@ pub struct EnvironmentVariables {
     bucket_ciphertext_len: usize,
 }
 
+#[allow(dead_code)]
 impl EnvironmentVariables {
     pub fn new(
         number_of_oram: usize,
@@ -185,6 +192,7 @@ impl EnvironmentVariables {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Serialize, Deserialize)]
 pub struct ExperimentWorkloadRequest {
     experiment_id: u64,
@@ -207,6 +215,7 @@ pub struct ExperimentWorkloadRequest {
     keep_not_requested_in_buckets: f64,
 }
 
+#[allow(dead_code)]
 impl ExperimentWorkloadRequest {
     pub fn serialize(&self) -> Vec<u8> {
         bincode::serialize(self).expect("Serializing the request has not worked out.")
@@ -267,6 +276,7 @@ impl ExperimentWorkloadRequest {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Serialize, Deserialize, Clone)]
 pub struct EnclaveStatistics {
     experiment_id: u64,
@@ -322,6 +332,7 @@ pub struct EnclaveStatistics {
     generated_data_byte_size: usize,
 }
 
+#[allow(dead_code)]
 impl EnclaveStatistics {
     pub fn new(index_locality_cache: bool, obt_fill_grade: u32) -> Self {
         EnclaveStatistics {

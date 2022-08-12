@@ -5,8 +5,8 @@ pub mod api {
 
     use oram_interface::{EnclaveStatistics, EnvironmentVariables};
 
-    use {buckets_from_server_cache};
     use {ocall_generic_request, ocall_get_oram_batch, ocall_write_oram_batch};
+    use BUCKETS_FROM_SERVER_CACHE;
 
 
     pub fn send_environment_variables(environment_variables: EnvironmentVariables) {
@@ -101,7 +101,7 @@ pub mod api {
             panic!("Error in OCALL ocall_get_oram_batch: {}", rt.as_str());
         }
 
-        let mut cache = buckets_from_server_cache.lock().unwrap();
+        let mut cache = BUCKETS_FROM_SERVER_CACHE.lock().unwrap();
         cache.pop()
     }
 
@@ -192,7 +192,7 @@ pub mod functions {
         statistics: &mut EnclaveStatistics,
         statistics_to_send: &mut StatisticsToSend,
         nonce_provider: &mut NonceProvider,
-        mut oram_buckets: Vec<BucketContentForLocal>,
+        oram_buckets: Vec<BucketContentForLocal>,
         oram_id: u32,
     ) -> Vec<u8> {
         let complete_ciphertext_len = oram_config.bucket_ciphertext_len() * oram_buckets.len();
@@ -356,7 +356,7 @@ pub mod functions {
         // that are requested from ORAM in this batch
         statistics.inc_number_packets_requested_from_oram(needed_objects.len() as u64);
 
-        let mut oram_buckets = transform_buckets_to_bucket_contents(
+        let oram_buckets = transform_buckets_to_bucket_contents(
             &dynamic_config,
             &mut statistics,
             oram_buckets,
@@ -371,9 +371,8 @@ pub mod functions {
             }
         };
 
-        let mut local_buckets: Vec<BucketContentForLocal> = Vec::with_capacity(oram_buckets.len());
         let mut just_bucket_transformation = false;
-        local_buckets = oram_buckets
+        let local_buckets: Vec<BucketContentForLocal> = oram_buckets
             .into_iter()
             .map(|bucket_content| {
                 let mut local_bucket = bucket_content.to_bucket_content_for_local(bucket_size);
@@ -402,7 +401,7 @@ pub mod functions {
                                 .value_range()
                                 .is_some()
                             {
-                                let mut time_iterate_buckets_for_locality_cache = Instant::now();
+                                let time_iterate_buckets_for_locality_cache = Instant::now();
                                 let time_byte_range_to_sql_data_types = Instant::now();
                                 let packet_value_range = {
                                     let (lower, upper) = byte_range_to_sql_data_types(
@@ -649,22 +648,13 @@ pub mod components {
                 free_space,
             }
         }
+        #[allow(dead_code)]
         fn packets_byte_size(&self) -> usize {
             let mut size = 0;
             for packet in self.packets.iter() {
                 size += packet.byte_size();
             }
             size
-        }
-        pub fn pop_packet(&mut self) -> Option<(Packet, usize)> {
-            return match self.packets.pop() {
-                None => None,
-                Some(some_packet) => {
-                    let size = some_packet.byte_size();
-                    self.free_space += size;
-                    Some((some_packet, size))
-                }
-            };
         }
         pub fn remove_packet(&mut self, index: usize) -> (Packet, usize) {
             let packet = self.packets.remove(index);
@@ -701,6 +691,7 @@ pub mod components {
     }
 
     impl BucketContent {
+        #[allow(dead_code)]
         pub fn new(poss_positions: (u32, u32), packets: Vec<Packet>, bucket_size: usize) -> Self {
             let mut size = 0;
             for packet in packets.iter() {
@@ -913,12 +904,14 @@ pub mod packaging {
         pub fn content(&self) -> &Vec<u8> {
             &self.content
         }
+        #[allow(dead_code)]
         pub fn destroy_packet_and_return_content(self) -> Vec<u8> {
             self.content
         }
         pub fn byte_size(&self) -> usize {
             bincode::serialized_size(&self).expect("") as usize
         }
+        #[allow(dead_code)]
         pub fn meta_byte_size() -> usize {
             2 * PositionTag::byte_size()
         }
