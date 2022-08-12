@@ -41,7 +41,7 @@ pub fn oram_access_benchmark(enclave_state: &EnclaveState) {
                 let oram_read_time: Instant = Instant::now();
                 let oram_buckets = oblivious_ram::api::get_paths(oram_instance, &leaves)
                     .expect("We should have got returned path data from ORAM.");
-                total_read_time += (oram_read_time.elapsed().as_nanos() as f64);
+                total_read_time += oram_read_time.elapsed().as_nanos() as f64;
 
                 oram_buckets
             };
@@ -83,7 +83,7 @@ pub fn oram_access_benchmark(enclave_state: &EnclaveState) {
 
             let oram_write_time: Instant = Instant::now();
             oblivious_ram::api::write_paths(oram_instance, &leaves, oram_buckets);
-            total_write_time += (oram_write_time.elapsed().as_nanos() as f64);
+            total_write_time += oram_write_time.elapsed().as_nanos() as f64;
 
             {
                 let mut statistics_to_send = enclave_state.lock_statistics_to_send();

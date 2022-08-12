@@ -1,15 +1,12 @@
 use config::OramConfig;
 use serde::{Deserialize, Serialize};
 use std::sync::{SgxMutex, SgxMutexGuard};
-use std::time::Instant;
-use std::untrusted::time::InstantEx;
 use std::vec::Vec;
 
-use helpers::generators::{ObTreeNodeIdProvider, PacketIdProvider, QueryIdProvider};
+use helpers::generators::{PacketIdProvider, QueryIdProvider};
 use logger::StatisticsToSend;
 use oram_interface::EnclaveStatistics;
 use query_response_cache::QueryResponseCache;
-use query_state::QueryState;
 use query_state_cache::QueryStateCache;
 use slot_cache::SlotCache;
 

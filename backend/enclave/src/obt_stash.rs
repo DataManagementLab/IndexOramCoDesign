@@ -1,4 +1,3 @@
-use log_runtime;
 use oblivious_data_structures::ob_tree::components::ObTreeDirectory;
 use oblivious_data_structures::page::SlotContent;
 use packet_stash::PacketStash;

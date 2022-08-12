@@ -4,9 +4,7 @@ use std::time::Instant;
 use std::untrusted::time::InstantEx;
 use std::vec::Vec;
 
-use crate::oblivious_data_structures::position_tag::PositionTag;
 use enclave_state::EnclaveState;
-use log_runtime;
 use oblivious_data_structures::ob_tree::components::Origin;
 use oblivious_ram::functions::{transform_oram_fragments_to_logical_object, Object};
 use oblivious_ram::packaging::Packet;
@@ -31,7 +29,7 @@ impl IndexLocalityCache {
     pub fn byte_size(&self) -> u64 {
         let mut byte_size: u64 = 0;
         for (_, (packet, _)) in self.cache.iter() {
-            byte_size += (packet.byte_size() as u64);
+            byte_size += packet.byte_size() as u64;
         }
         byte_size
     }

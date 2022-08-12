@@ -4,17 +4,16 @@ pub mod api {
     use std::vec::Vec;
 
     use oram_interface::{EnclaveStatistics, EnvironmentVariables};
-    use sql_engine::sql_data_types::components::SqlDataType;
-    use {buckets_from_server_cache, oram_interface};
+
+    use {buckets_from_server_cache};
     use {ocall_generic_request, ocall_get_oram_batch, ocall_write_oram_batch};
 
-    use crate::oblivious_ram::components::*;
 
     pub fn send_environment_variables(environment_variables: EnvironmentVariables) {
         let request = crate::oram_interface::GenericRequestToServer::EnvironmentVariables(
             environment_variables,
         )
-        .serialize();
+            .serialize();
         let request_len = request.len() as u32;
 
         let mut rt: sgx_status_t = sgx_status_t::SGX_ERROR_UNEXPECTED;
@@ -129,11 +128,10 @@ pub mod api {
 }
 
 pub mod functions {
-    use alloc::collections::BTreeMap;
     use rand::Rng;
     use std::collections::HashMap;
-    use std::string::String;
-    use std::sync::SgxMutexGuard;
+
+
     use std::time::Instant;
     use std::untrusted::time::InstantEx;
     use std::vec::Vec;
@@ -141,14 +139,14 @@ pub mod functions {
     use config::DynamicConfig;
     use crypto::NonceProvider;
     use enclave_state::EnclaveState;
-    use helpers::oram_helper::get_number_of_leaves;
-    use helpers::range::{byte_range_to_sql_data_types, Range};
+
+    use helpers::range::{byte_range_to_sql_data_types};
     use logger::StatisticsToSend;
     use oblivious_data_structures::ob_tree::components::{
         ObTreeNode, ObTreeNodeForORAM, ObTreeQueryValue, ObTreeQueryValueRange, Origin,
     };
     use oblivious_data_structures::page::Slot;
-    use oblivious_data_structures::position_tag::PositionTag;
+
     use oblivious_ram::api;
     use oblivious_ram::components::{
         bucket_to_bucket_content, BucketContent, BucketContentForLocal,
@@ -157,13 +155,12 @@ pub mod functions {
     use oram_interface::EnclaveStatistics;
     use packet_stash::PacketStash;
     use query_state::ObjectType;
-    use sql_engine::sql_data_types::components::SqlDataType;
-    use sql_engine::sql_database::components::SqlAttribute;
-    use DEBUG_RUNTIME_CHECKS;
-    use {helpers, OramConfig};
-    use {oram_interface, IndexLocalityCache};
-    use {AES_TAG_LEN, NONCE_SIZE};
-    use {DUMMY_SEQUENCE, PRINT_PACKET_EVICTIONS};
+
+
+    use {OramConfig};
+
+
+    use {PRINT_PACKET_EVICTIONS};
 
     pub fn transform_buckets_to_bucket_contents(
         dynamic_config: &DynamicConfig,
@@ -399,11 +396,11 @@ pub mod functions {
                             if can_cache
                                 && free_space_in_locality_cache
                                 && local_bucket
-                                    .packets()
-                                    .get(packet_index)
-                                    .unwrap()
-                                    .value_range()
-                                    .is_some()
+                                .packets()
+                                .get(packet_index)
+                                .unwrap()
+                                .value_range()
+                                .is_some()
                             {
                                 let mut time_iterate_buckets_for_locality_cache = Instant::now();
                                 let time_byte_range_to_sql_data_types = Instant::now();
@@ -623,19 +620,19 @@ pub mod functions {
 
 pub mod components {
     use core::convert::TryInto;
-    use ring::error::Unspecified;
+
 
     use serde::{Deserialize, Serialize};
-    use std::string::{String, ToString};
+    use std::string::{ToString};
     use std::vec::Vec;
 
     use logger::log_runtime;
     use oblivious_ram::packaging::Packet;
     use AES_TAG_LEN;
     use DEBUG_RUNTIME_CHECKS;
-    use NUMBER_OF_THREADS;
+
     use SHARED_KEY_LEN;
-    use {EMPTY_NONCE, NONCE_SIZE};
+    use {NONCE_SIZE};
 
     #[derive(Clone)]
     pub struct BucketContentForLocal {
@@ -659,7 +656,7 @@ pub mod components {
             }
             size
         }
-        pub fn pop_packet(&mut self) -> (Option<(Packet, usize)>) {
+        pub fn pop_packet(&mut self) -> Option<(Packet, usize)> {
             return match self.packets.pop() {
                 None => None,
                 Some(some_packet) => {
@@ -853,14 +850,10 @@ pub mod packaging {
     use std::untrusted::time::InstantEx;
     use std::vec::Vec;
     use EnclaveState;
-
     use helpers::range::ByteRange;
-    use oblivious_ram::components::BucketContent;
     use oram_interface::EnclaveStatistics;
-
     use crate::oblivious_data_structures::position_tag::PositionTag;
-    use crate::packet_stash::PacketStash;
-    use crate::{DUMMY_SEQUENCE, MAX_PACKET_SIZE};
+    use crate::{MAX_PACKET_SIZE};
 
     #[derive(Serialize, Deserialize, Clone)]
     pub struct Packet {

@@ -1,5 +1,4 @@
 pub mod range {
-    use core::cmp::Ordering;
     use serde::{Deserialize, Serialize};
     use std::vec::Vec;
 
@@ -121,15 +120,7 @@ pub mod range {
 
 pub mod oram_helper {
     use rand::Rng;
-    use sha2::Digest;
     use std::ops::Sub;
-    use std::string::{String, ToString};
-    use std::time::SystemTime;
-    use std::untrusted::time::SystemTimeEx;
-    use std::vec::Vec;
-
-    use crate::crypto::generate_random_key;
-    use crate::DUMMY_SEQUENCE;
 
     pub fn get_possible_positions(
         oram_degree: usize,
@@ -223,7 +214,7 @@ pub mod oram_helper {
     }
 
     pub fn get_number_of_inner_nodes(oram_degree: u32, oram_tree_height: usize) -> u32 {
-        get_number_of_tree_nodes(oram_degree, ((oram_tree_height - 1) as u32))
+        get_number_of_tree_nodes(oram_degree, (oram_tree_height - 1) as u32)
     }
 
     pub fn get_number_of_tree_nodes(oram_degree: u32, height: u32) -> u32 {

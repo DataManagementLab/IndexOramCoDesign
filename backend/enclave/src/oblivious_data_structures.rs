@@ -1,15 +1,10 @@
 pub mod position_tag {
-    use core::str::FromStr;
-
     use serde::{Deserialize, Serialize};
     use std::string::String;
-    use std::string::ToString;
-    use std::vec::Vec;
 
     use EnclaveState;
 
     use crate::helpers::oram_helper::{get_random_oram_id, get_random_oram_position};
-    use crate::DUMMY_SEQUENCE;
 
     #[derive(Serialize, Deserialize, Clone)]
     pub struct PositionTagWithoutId {
@@ -156,11 +151,10 @@ pub mod page {
     use std::untrusted::time::InstantEx;
     use std::vec::Vec;
 
-    use oblivious_data_structures::ob_tree::components::{ObTreeQuery, Origin};
-    use query_state::{ObTreeSlotContentFilter, ParentId, ParentNodeId};
+    use oblivious_data_structures::ob_tree::components::{Origin};
+    use query_state::{ObTreeSlotContentFilter, ParentId};
     use sql_engine::sql_data_types::components::SqlDataType;
-    use sql_engine::sql_data_types::functions::decompress_sql_data_type;
-    use sql_engine::sql_database::components::SqlAttribute;
+
 
     use crate::enclave_state::EnclaveState;
     use crate::oblivious_data_structures::position_tag::PositionTag;
@@ -384,18 +378,18 @@ pub mod ob_tree {
     pub mod components {
         use alloc::collections::BTreeMap;
         use core::cmp::Ordering;
-        use core::hash::Hash;
+
 
         use serde::{Deserialize, Serialize};
         use std::collections::HashMap;
-        use std::io::ErrorKind::Other;
-        use std::string::String;
+
+
         use std::time::Instant;
         use std::untrusted::time::InstantEx;
         use std::vec::Vec;
 
         use helpers::range::{sql_data_type_range_to_lossy_byte_range, Range};
-        use oblivious_data_structures::page::Slot;
+
         use oblivious_data_structures::position_tag::PositionTagWithoutId;
         use obt_stash::ObTreeNodeCache;
         use query_state::ObjectType::SlotObjectType;
@@ -405,8 +399,8 @@ pub mod ob_tree {
         use sql_engine::sql_data_types::components::SqlDataType;
         use sql_engine::sql_database::components::SqlAttribute;
         use utils::Pair;
-        use {enclave_state_cache, log_runtime};
-        use {DEBUG_PRINTS, DEBUG_RUNTIME_CHECKS};
+        use {log_runtime};
+        use {DEBUG_PRINTS};
 
         use crate::enclave_state::EnclaveState;
         use crate::oblivious_data_structures::page::SlotPointer;
@@ -1624,25 +1618,22 @@ pub mod ob_tree {
 
         use helpers::range::{ByteRange, Range};
         use oblivious_data_structures::ob_tree;
-        use oblivious_data_structures::ob_tree::api::traverse_ob_tree;
+
         use oblivious_data_structures::ob_tree::components::{
-            ObTreeQueryValue, ObTreeTuplePointer, Origin,
+            ObTreeTuplePointer, Origin,
         };
         use oblivious_data_structures::page::{
-            create_slot_and_evict, Slot, SlotContent, SlotPointer,
+            create_slot_and_evict,
         };
-        use oblivious_data_structures::position_tag::PositionTag;
+
         use oram_interface::EnclaveStatistics;
-        use query_state::{
-            NextPos, ObTreeOperation, ObTreeSlotContentFilter, ObjectType, ParentId, ParentNodeId,
-            ParentSlotId, QueryState,
-        };
+        use query_state::{NextPos, QueryState};
         use sql_engine::sql_data_types::components::SqlDataType;
         use sql_engine::sql_data_types::functions::{
             compress_sql_data_type, decompress_sql_data_type,
         };
         use sql_engine::sql_database::components::SqlAttribute;
-        use {EnclaveState, RIDS_PER_SLOT};
+        use {EnclaveState};
 
         #[derive(Clone, PartialEq)]
         pub enum ObTreeKeyCmpOperator {
@@ -1840,16 +1831,16 @@ pub mod ob_tree {
     mod eviction {
         use std::time::Instant;
         use std::untrusted::time::InstantEx;
-        use std::vec::Vec;
+
 
         use helpers::range::ByteRange;
         use oblivious_data_structures::ob_tree::components::{
-            ObTreeChildPointer, ObTreeNode, ParentNode,
+            ParentNode,
         };
         use oblivious_data_structures::page::{Slot, SlotContent};
         use oblivious_data_structures::position_tag::PositionTag;
-        use query_state::{NextPos, ParentNodeId};
-        use {log_runtime, DEBUG_PRINTS};
+        use query_state::{ParentNodeId};
+        use {log_runtime};
         use {EnclaveState, DEBUG_RUNTIME_CHECKS};
 
         pub fn evict_slot_back_to_front(
@@ -1886,20 +1877,20 @@ pub mod ob_tree {
                     // Check if no other queries want to visit its successor item, and that its successor is not in the cache
                     if current_slot.content().rids().unwrap().visited_empty()
                         && !(current_slot.content().rids().unwrap().next().is_some()
-                            && enclave_state
-                                .lock_slot_cache()
-                                .get_slot(
-                                    current_slot
-                                        .content()
-                                        .rids()
-                                        .unwrap()
-                                        .next()
-                                        .as_ref()
-                                        .unwrap()
-                                        .position()
-                                        .packet_id(),
-                                )
-                                .is_some())
+                        && enclave_state
+                        .lock_slot_cache()
+                        .get_slot(
+                            current_slot
+                                .content()
+                                .rids()
+                                .unwrap()
+                                .next()
+                                .as_ref()
+                                .unwrap()
+                                .position()
+                                .packet_id(),
+                        )
+                        .is_some())
                     {
                         // Check if the parent of the slot is a node
                         if current_slot.parent().as_ref().unwrap().node().is_some() {
@@ -2249,11 +2240,11 @@ pub mod ob_tree {
         use helpers::range::Range;
         use oblivious_data_structures::ob_tree::components::ParentNode::NoParent;
         use oblivious_data_structures::ob_tree::components::{
-            ObTree, ObTreeChildPointer, ObTreeNode, ObTreeTuplePointer, Origin, ParentNode,
+            ObTreeChildPointer, ObTreeNode, ObTreeTuplePointer, Origin, ParentNode,
         };
         use oblivious_data_structures::ob_tree::eviction::evict_node_bottom_up;
         use oblivious_data_structures::position_tag::PositionTag;
-        use query_state::{NextPos, ObjectType, ParentId, ParentNodeId, QueryState};
+        use query_state::{NextPos, ObjectType, ParentId, ParentNodeId};
         use sql_engine::sql_data_types::components::SqlDataType;
         use sql_engine::sql_data_types::functions::decompress_sql_data_type;
         use sql_engine::sql_database::components::SqlAttribute;
@@ -2283,7 +2274,7 @@ pub mod ob_tree {
             let fill_grade = enclave_state.fill_grade();
             assert_eq!(right_node.tuple_pointers().len(), 2 * fill_grade + 1);
             let tuple_pointer_border = fill_grade;
-            let child_pointer_border = (fill_grade + 1);
+            let child_pointer_border = fill_grade + 1;
 
             let pos_left = PositionTag::new_random(enclave_state);
             let pos_left_id = pos_left.copy_packet_id();
@@ -2340,7 +2331,7 @@ pub mod ob_tree {
             {
                 let mut slot_cache = enclave_state.lock_slot_cache();
                 for (tuple_iter, tuple_iter_pointer) in
-                    new_left_node.tuple_pointers().iter().enumerate()
+                new_left_node.tuple_pointers().iter().enumerate()
                 {
                     match slot_cache
                         .mut_slot(tuple_iter_pointer.slot_pointer().position().packet_id())
@@ -2357,7 +2348,7 @@ pub mod ob_tree {
                     }
                 }
                 for (tuple_iter, tuple_iter_pointer) in
-                    right_node.tuple_pointers().iter().enumerate()
+                right_node.tuple_pointers().iter().enumerate()
                 {
                     match slot_cache
                         .mut_slot(tuple_iter_pointer.slot_pointer().position().packet_id())
@@ -2640,8 +2631,7 @@ pub mod ob_tree {
                 }
             }
             // Adaption of parent pointers
-            if right_node.parent_node().parent_node_id().is_some() {
-            } else {
+            if right_node.parent_node().parent_node_id().is_some() {} else {
                 assert!(right_node.parent_node().is_no_parent());
             }
 
@@ -3259,50 +3249,27 @@ pub mod ob_tree {
 
     /// API module to use/traverse Ob-Tree from outside
     pub mod api {
-        use core::borrow::BorrowMut;
-
-        use serde::de::Unexpected::Map;
-        use std::collections::HashMap;
-        use std::string::String;
-        use std::sync::SgxMutexGuard;
         use std::time::Instant;
         use std::untrusted::time::InstantEx;
-        use std::vec::Vec;
-
-        use helpers::range::Range;
         use oblivious_data_structures::ob_tree;
         use oblivious_data_structures::ob_tree::components::{
-            ObTree, ObTreeQuery, ObTreeQueryValue, ObTreeTuplePointerStatus, Origin, ParentNode,
+            ObTreeQueryValue, ObTreeTuplePointerStatus, Origin, ParentNode,
         };
         use oblivious_data_structures::ob_tree::eviction::{
-            cast_remove_do_not_evict_upwards, evict_node_bottom_up,
+            evict_node_bottom_up,
         };
         use oblivious_data_structures::ob_tree::helpers::{
             helper_insert_new_tuple_to_obt_leaf, search_single_value_in_node_tuple_pointers,
             ObTreeKeyCmpOperator,
         };
-        use oblivious_data_structures::page::{RIDChainItem, Slot};
-        use obt_stash::ObTreeNodeCache;
-        use query_state::ObTreeOperation::INSERT;
+        use oblivious_data_structures::page::{Slot};
         use query_state::{
-            NextPos, ObTreeOperation, ObTreeSlotContentFilter, ObjectType, ParentId, ParentNodeId,
+            NextPos, ObTreeOperation, ObjectType, ParentId, ParentNodeId,
             ParentSlotId, QueryOperationStatus, QueryState,
         };
-        use slot_cache::SlotCache;
-        use {enclave_state_cache, DEBUG_RUNTIME_CHECKS};
-        use {log_runtime, DEBUG_PRINTS};
-
         use crate::enclave_state::EnclaveState;
-        use crate::oblivious_data_structures::ob_tree::components::{
-            ObTreeChildPointer, ObTreeNode, ObTreeTuplePointer,
-        };
         use crate::oblivious_data_structures::page::{SlotContent, SlotPointer};
         use crate::oblivious_data_structures::position_tag::PositionTag;
-        use crate::sql_engine::sql_data_types::components::SqlDataType;
-        use crate::sql_engine::sql_data_types::functions::{
-            compress_sql_data_type, decompress_sql_data_type,
-        };
-        use crate::sql_engine::sql_database::components::SqlAttribute;
         use crate::RIDS_PER_SLOT;
 
         pub fn traverse_ob_tree(enclave_state: &EnclaveState, query_state: &mut QueryState) {
@@ -3819,7 +3786,7 @@ pub mod ob_tree {
                                                                     enclave_state
                                                                         .lock_query_state_cache();
                                                                 for other_query_id in
-                                                                    some_meta_entry.iter()
+                                                                some_meta_entry.iter()
                                                                 {
                                                                     let mut other_query =
                                                                         query_state_cache
