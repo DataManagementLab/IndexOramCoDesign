@@ -1,0 +1,7 @@
+backend/app/target/release/.fingerprint/actix-codec-20c1bd5b7f80c1ae/lib-actix_codec
+backend/bin/
+backend/app/target/
+enclave/target/
+frontend/node_modules/
+*.iml
+/.idea
